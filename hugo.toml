@@ -1,0 +1,48 @@
+baseURL = 'https://example.org/'
+languageCode = 'en-us'
+title = 'My New Hugo Site'
+theme = 'nightfall'
+
+[menu]
+  [[menu.header]]
+    name = "posts"
+    weight = 0
+    url = "/posts"
+  [[menu.header]]
+    name = "home"
+    weight = 0
+    url = "/"
+
+
+[params]
+published = false
+footerHtml = 'Thanks to <a href="https://gohugo.io" class="footerLink">Hugo</a> and <a href="https://github.com/LordMathis/hugo-theme-nightfall" class="footerLink">Nightfall</a> '
+
+
+[params.author]
+name = "Hi!"
+avatarFirst = false
+
+readingTime = true  # Show reading time on post page
+published = true  # Show published data on post page
+
+[[params.social]]
+key = 0
+name = "github"
+url = "https://github.com/mdrmono"
+target = "_blank"
+aria = "GitHub Profile"
+
+[[params.social]]
+key = 0
+name = "codeforces"
+url = "https://codeforces.com/profile/mdrmono"
+target = "_blank"
+aria = "Codeforces Profile"
+
+[[params.social]]
+key = 0
+name = "linkedin"
+url = "https://www.linkedin.com/in/manuel-delfin-973589186/"
+target = "_blank"
+aria = "Linkedin Profile"
