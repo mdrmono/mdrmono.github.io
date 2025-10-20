@@ -1,0 +1,22 @@
+# Hugo build outputs
+/public/
+/resources/_gen/
+.hugo_build.lock
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git submodule content (managed separately)
+# The anki-stats.json is managed by the anki-stats-data submodule
+static/data/anki-stats.json
+
+# Logs
+*.log

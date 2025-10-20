@@ -7,8 +7,8 @@ This Hugo website features an interactive heatmap visualization showing your Ank
 - **GitHub-style heatmap** showing daily review activity
 - **Streak tracking** - current and longest streak display
 - **Total review count** statistics
-- **Automatic daily updates** via GitHub Actions
-- **Secure architecture** - Raspberry Pi never exposed to public internet
+- **Automatic daily updates** via Raspberry Pi cron job
+- **Simple architecture** - direct push from Pi to GitHub
 - **Dark theme** styled to match Nightfall Hugo theme
 - **Responsive design** - works on mobile and desktop
 - **Hover tooltips** showing exact review counts per day
@@ -16,34 +16,40 @@ This Hugo website features an interactive heatmap visualization showing your Ank
 ## Architecture Overview
 
 ```
-┌─────────────────┐
-│  Raspberry Pi   │
-│  - Anki Desktop │
-│  - Tailscale    │──┐
-│  - Export Script│  │
-└─────────────────┘  │
-                     │ Private Network
-                     │ (Tailscale)
-┌─────────────────┐  │
-│ GitHub Actions  │  │
-│  - Runs daily   │──┘
-│  - Connects Pi  │
-│  - Updates data │
-└────────┬────────┘
-         │
-         ↓
-┌─────────────────┐
-│  Data Repo      │
-│  anki-stats.json│
-└────────┬────────┘
-         │
-         ↓
-┌─────────────────┐
-│  Hugo Website   │
-│  - Heatmap      │
-│  - Stats Display│
-└─────────────────┘
+┌──────────────────────┐
+│   Raspberry Pi       │
+│  - Anki Database     │
+│  - Export Script     │
+│  - Cron Job (2AM)    │
+└──────────┬───────────┘
+           │ Local execution
+           ▼
+     Export to JSON
+           │
+           ▼
+     Git commit & push
+           │
+           ▼
+┌──────────────────────┐
+│  GitHub Repository   │
+│  anki-stats-data     │
+│  (Git Submodule)     │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│  Hugo Website        │
+│  (Fetches via        │
+│   Submodule)         │
+└──────────────────────┘
 ```
+
+**Why this approach?**
+- ✅ Simple and reliable
+- ✅ No external services needed (no Tailscale, no GitHub Actions)
+- ✅ Faster execution (local)
+- ✅ Fewer failure points
+- ✅ Easy to debug
 
 ## Quick Start
 
@@ -53,7 +59,7 @@ The heatmap visualization is already integrated into your Hugo site:
 
 - `layouts/index.html` - Homepage with heatmap
 - `layouts/partials/anki-heatmap.html` - Heatmap component
-- `static/data/anki-stats.json` - Mock data (will be replaced with real data)
+- `static/data/` - Git submodule pointing to data repository
 
 ### 2. Test Locally
 
@@ -61,7 +67,7 @@ The heatmap visualization is already integrated into your Hugo site:
 # Install Hugo if you haven't
 # https://gohugo.io/installation/
 
-# Initialize theme
+# Initialize all submodules (theme + data)
 git submodule update --init --recursive
 
 # Start development server
@@ -72,49 +78,42 @@ hugo server -D
 
 You should see the heatmap on your homepage with sample data.
 
-### 3. Set Up Data Repository
+### 3. Set Up Automation on Raspberry Pi
 
-Choose one of these options:
+Follow the comprehensive guide in [`PI_CRON_SETUP.md`](./PI_CRON_SETUP.md):
 
-**Option A: Separate Repository (Recommended)**
-- Cleaner git history
-- See [`DATA_REPO_SETUP.md`](./DATA_REPO_SETUP.md) for instructions
+**Summary:**
+1. Create GitHub data repository (`anki-stats-data`)
+2. Copy scripts to your Raspberry Pi
+3. Run the setup script: `bash setup-pi-cron.sh`
+4. Add deploy key to GitHub
+5. Verify the cron job is working
 
-**Option B: Orphan Branch**
-- Single repository
-- See [`DATA_REPO_SETUP.md`](./DATA_REPO_SETUP.md) for instructions
+The setup script guides you through everything interactively!
 
-### 4. Configure Raspberry Pi
-
-Follow the comprehensive guide in [`PI_SETUP.md`](./PI_SETUP.md):
-
-1. Install Anki on Pi (or sync database)
-2. Install Tailscale
-3. Set up export script
-4. Configure SSH access
-5. Add GitHub secrets
-
-### 5. Deploy GitHub Actions
-
-1. Edit `.github/workflows/update-anki-stats.yml`
-2. Update `YOUR_USERNAME/anki-stats-data` with your data repo
-3. Commit and push to GitHub
-4. Add required secrets (see `PI_SETUP.md`)
-5. Test workflow manually
-
-### 6. Update Website Configuration
-
-Once your data repo is set up, update the fetch URL in `layouts/partials/anki-heatmap.html`:
-
-```javascript
-// Change this line:
-fetch('/data/anki-stats.json')
-
-// To:
-fetch('https://raw.githubusercontent.com/YOUR_USERNAME/anki-stats-data/main/data/anki-stats.json')
+```bash
+# On your Pi
+cd ~/anki-export
+bash setup-pi-cron.sh
 ```
 
-### 7. Deploy Your Website
+### 4. Add Data Repository as Submodule
+
+In your website repository:
+
+```bash
+# Add the data repo as a submodule
+git submodule add git@github.com:YOUR_USERNAME/anki-stats-data.git static/data
+
+# Commit the submodule
+git add .gitmodules .gitignore static/data
+git commit -m "Add anki-stats-data as submodule"
+git push
+```
+
+**Note:** Update `YOUR_USERNAME` in `.gitmodules` with your actual GitHub username.
+
+### 5. Deploy Your Website
 
 Deploy to your preferred hosting:
 
@@ -147,20 +146,22 @@ git push
 ```
 website/
 ├── .github/
-│   └── workflows/
-│       └── update-anki-stats.yml    # GitHub Actions workflow
+│   └── workflows-archive/
+│       └── update-anki-stats.yml    # Archived (old GitHub Actions approach)
 ├── layouts/
-│   ├── index.html                    # Homepage (includes heatmap)
+│   ├── index.html                   # Homepage (includes heatmap)
 │   └── partials/
-│       └── anki-heatmap.html         # Heatmap component
+│       └── anki-heatmap.html        # Heatmap component
 ├── static/
-│   └── data/
-│       └── anki-stats.json           # Stats data (mock/real)
+│   └── data/                        # Git submodule → anki-stats-data repo
+│       └── anki-stats.json          # Stats data (auto-updated by Pi)
 ├── scripts/
-│   └── export_anki_stats.py          # Export script for Pi
-├── ANKI_HEATMAP_README.md            # This file
-├── DATA_REPO_SETUP.md                # Data repository setup
-└── PI_SETUP.md                       # Raspberry Pi setup
+│   ├── export_anki_stats.py         # Export script for Pi
+│   └── pi/
+│       ├── update-anki-stats.sh     # Main automation script
+│       └── setup-pi-cron.sh         # One-time setup script
+├── ANKI_HEATMAP_README.md           # This file
+└── PI_CRON_SETUP.md                 # Raspberry Pi setup guide
 ```
 
 ## Customization
@@ -178,24 +179,37 @@ Edit `layouts/partials/anki-heatmap.html` and modify the color values:
 
 ### Change Schedule
 
-Edit `.github/workflows/update-anki-stats.yml`:
+Edit the cron job on your Raspberry Pi:
 
-```yaml
-schedule:
-  - cron: '0 2 * * *'  # Change time here
+```bash
+# On your Pi
+crontab -e
+
+# Modify the time (current: 2 AM UTC)
+0 2 * * * /home/pi/anki-export/update-anki-stats.sh >> /home/pi/anki-export/cron.log 2>&1
+
+# Examples:
+# Daily at 3 AM local: 0 3 * * *
+# Every 6 hours:       0 */6 * * *
+# Daily at midnight:   0 0 * * *
 ```
 
 Use [crontab.guru](https://crontab.guru/) to generate cron expressions.
 
 ### Filter by Deck
 
-When running the export script on your Pi, specify a deck:
+Edit `~/anki-export/update-anki-stats.sh` on your Pi:
 
 ```bash
-python3 export_anki_stats.py --deck-name "Mandarin" --output /tmp/anki-stats.json
-```
+# Change this line:
+DECK_NAME="Mandarin"
 
-Update the script path in GitHub Actions workflow accordingly.
+# To your deck name:
+DECK_NAME="Your Deck Name"
+
+# Or leave empty for all decks:
+DECK_NAME=""
+```
 
 ### Adjust Time Range
 
@@ -210,22 +224,50 @@ range: 12,  // Number of months to display
 
 ### Manual Update
 
-Trigger GitHub Actions workflow manually:
-1. Go to repository → Actions tab
-2. Select "Update Anki Stats"
-3. Click "Run workflow"
+Run the update script manually on your Pi:
+
+```bash
+cd ~/anki-export
+bash update-anki-stats.sh
+```
 
 ### Check Logs
 
-- **GitHub Actions**: Repository → Actions → Select workflow run
-- **Raspberry Pi**: `journalctl -u ssh -n 50`
+View logs on your Raspberry Pi:
+
+```bash
+# Main script log
+tail -f ~/anki-export/update-anki-stats.log
+
+# Cron execution log
+tail -f ~/anki-export/cron.log
+
+# Last 50 lines
+tail -n 50 ~/anki-export/update-anki-stats.log
+```
 
 ### Update Export Script
 
 On your Pi:
 ```bash
 cd ~/anki-export
-wget https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/scripts/export_anki_stats.py -O export_anki_stats.py
+# Download updated script from your repo
+scp your-dev-machine:/path/to/export_anki_stats.py .
+```
+
+### Pull Latest Data in Website
+
+When deploying your website, pull the latest submodule data:
+
+```bash
+# Update submodule to latest commit
+git submodule update --remote static/data
+
+# Rebuild
+hugo
+
+# Or add to your deploy script:
+git submodule update --remote --merge && hugo
 ```
 
 ## Troubleshooting
@@ -233,29 +275,37 @@ wget https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/scripts/expo
 ### Heatmap Shows "Loading..."
 
 1. Check browser console for errors (F12 → Console)
-2. Verify JSON file is accessible at the fetch URL
-3. Check CORS settings if using external URL
+2. Verify JSON file exists: `static/data/anki-stats.json`
+3. Ensure submodule is initialized: `git submodule update --init`
+4. Check Hugo is serving static files correctly
 
 ### No Data Updates
 
-1. Check GitHub Actions logs for errors
-2. Verify Pi is online and Tailscale is running
-3. Test export script manually on Pi
-4. Verify GitHub secrets are correct
+1. Check Pi cron logs: `tail -f ~/anki-export/cron.log`
+2. Test manually: `bash ~/anki-export/update-anki-stats.sh`
+3. Verify Pi has internet: `ping github.com`
+4. Check deploy key permissions on GitHub
 
 ### Stats Look Wrong
 
 1. Verify Anki database is up to date on Pi
-2. Check export script output for errors
+2. Check export script output: `tail ~/anki-export/update-anki-stats.log`
 3. Validate JSON file format
-4. Compare with mock data structure
+4. Test export manually: `python3 ~/anki-export/export_anki_stats.py --output /tmp/test.json`
+
+### Git Push Fails from Pi
+
+1. Test SSH connection: `ssh -T git@github.com`
+2. Check deploy key is added with write access
+3. Verify repository exists: `https://github.com/YOUR_USERNAME/anki-stats-data`
+4. Check git config: `cd ~/anki-export/anki-stats-data && git config --list`
 
 ## Security
 
-- **Zero public exposure** - Pi stays on private Tailscale network
-- **Encrypted connections** - All traffic over Tailscale VPN
-- **Ephemeral access** - GitHub Actions uses temporary Tailscale auth
-- **Revocable keys** - SSH keys can be rotated anytime
+- **Standard Git SSH authentication** - Secure deploy key with write access
+- **Private Pi** - No need to expose Pi to internet
+- **Revocable keys** - SSH deploy keys can be rotated anytime
+- **Separate data repo** - Clean separation of concerns
 - **Read-only website** - No write operations on public site
 
 ## Performance
@@ -263,7 +313,24 @@ wget https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/scripts/expo
 - **Static site** - Fast loading with Hugo
 - **CDN-hosted libraries** - Cal-heatmap from jsDelivr CDN
 - **Lightweight** - ~25KB for visualization library
-- **Cached data** - JSON file cached at CDN edge
+- **Git submodule** - Efficient data management
+
+## Migration from GitHub Actions
+
+If you previously used the GitHub Actions approach:
+
+1. ✅ Follow the setup guide in `PI_CRON_SETUP.md`
+2. ✅ Verify the cron job works
+3. ✅ The old workflow is archived in `.github/workflows-archive/`
+4. ✅ You can remove Tailscale from your Pi if no longer needed
+5. ✅ Remove old GitHub secrets (optional)
+
+**Benefits of the new approach:**
+- Much simpler setup (10 min vs 45 min)
+- Fewer dependencies (no Tailscale needed)
+- More reliable (fewer network hops)
+- Easier debugging (logs are local)
+- Faster execution (local processing)
 
 ## License
 
@@ -273,14 +340,14 @@ This implementation is free to use and modify for your personal website.
 
 - **Hugo Theme**: [Nightfall](https://github.com/LordMathis/hugo-theme-nightfall) by LordMathis
 - **Visualization**: [Cal-Heatmap](https://cal-heatmap.com/)
-- **Infrastructure**: [Tailscale](https://tailscale.com/) for secure networking
-- **Automation**: GitHub Actions
+- **Automation**: Raspberry Pi + cron
 
 ## Support
 
 For issues or questions:
-1. Check the documentation files (`PI_SETUP.md`, `DATA_REPO_SETUP.md`)
-2. Review GitHub Actions logs
-3. Open an issue on the repository
+1. Check the documentation: [`PI_CRON_SETUP.md`](./PI_CRON_SETUP.md)
+2. Review Pi logs: `~/anki-export/update-anki-stats.log`
+3. Test components individually
+4. Open an issue on the repository
 
 Happy studying! 学习愉快！
