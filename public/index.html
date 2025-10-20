@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="">
 
-<meta name="generator" content="Hugo 0.147.2">
+<meta name="generator" content="Hugo 0.123.7">
 
 
 <link rel="canonical" href="http://localhost:1313/" >
@@ -23,6 +23,8 @@
 <link href="/css/style.min.5c1fa9bba2d0e854fe30b3d6316ab0114a2a5f25c9a98275badeadb66f2ec725.css" rel="stylesheet">
 
 
+<script src="/js/vim-motions.js" defer></script>
+
 
 
 </head>
@@ -32,6 +34,11 @@
     <div class="flexWrapper">
         <header class="headerWrapper">
     <div class="header">
+        <div>
+            <a class="terminal" href="/">
+                <span>@ ~ $</span>
+            </a>
+        </div>
         <input class="side-menu" type="checkbox" id="side-menu">
         <label class="hamb" for="side-menu"><span class="hamb-line"></span></label>
         <nav class="headerLinks">
@@ -65,6 +72,253 @@
                         
 
                     
+
+                    
+                    
+<div class="anki-heatmap-container">
+    <div class="anki-heatmap-header">
+        <h2>Mandarin Study Streak</h2>
+        <div class="anki-stats">
+            <span class="stat-item">
+                <span class="stat-label">Current Streak:</span>
+                <span class="stat-value" id="current-streak">-</span> days
+            </span>
+            <span class="stat-item">
+                <span class="stat-label">Longest Streak:</span>
+                <span class="stat-value" id="longest-streak">-</span> days
+            </span>
+            <span class="stat-item">
+                <span class="stat-label">Total Reviews:</span>
+                <span class="stat-value" id="total-reviews">-</span>
+            </span>
+        </div>
+    </div>
+    <div id="cal-heatmap"></div>
+    <div class="heatmap-legend">
+        <span class="legend-label">Less</span>
+        <div class="legend-scale">
+            <span class="legend-box level-0"></span>
+            <span class="legend-box level-1"></span>
+            <span class="legend-box level-2"></span>
+            <span class="legend-box level-3"></span>
+            <span class="legend-box level-4"></span>
+        </div>
+        <span class="legend-label">More</span>
+    </div>
+    <div id="heatmap-loading" class="loading-message">Loading study data...</div>
+    <div id="heatmap-error" class="error-message" style="display: none;">Failed to load study data.</div>
+</div>
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@4.2.4/cal-heatmap.css">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cal-heatmap@4.2.4/cal-heatmap.min.js"></script>
+
+<style>
+.anki-heatmap-container {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.anki-heatmap-header {
+    margin-bottom: 1.5rem;
+}
+
+.anki-heatmap-header h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    color: #e0e0e0;
+}
+
+.anki-stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+}
+
+.stat-item {
+    display: flex;
+    gap: 0.5rem;
+    color: #b0b0b0;
+}
+
+.stat-label {
+    font-weight: normal;
+}
+
+.stat-value {
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+#cal-heatmap {
+    margin: 1rem 0;
+    overflow-x: auto;
+}
+
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: #b0b0b0;
+}
+
+.legend-scale {
+    display: flex;
+    gap: 2px;
+}
+
+.legend-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.legend-box.level-0 {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.legend-box.level-1 {
+    background: rgba(76, 175, 80, 0.3);
+}
+
+.legend-box.level-2 {
+    background: rgba(76, 175, 80, 0.5);
+}
+
+.legend-box.level-3 {
+    background: rgba(76, 175, 80, 0.7);
+}
+
+.legend-box.level-4 {
+    background: rgba(76, 175, 80, 1);
+}
+
+.loading-message {
+    text-align: center;
+    color: #b0b0b0;
+    padding: 1rem;
+    font-style: italic;
+}
+
+.error-message {
+    text-align: center;
+    color: #f44336;
+    padding: 1rem;
+}
+
+ 
+.cal-heatmap-container {
+    color: #e0e0e0;
+}
+
+.cal-heatmap-container .graph-label {
+    fill: #b0b0b0;
+}
+
+ 
+.ch-tooltip {
+    background: rgba(0, 0, 0, 0.9) !important;
+    color: #e0e0e0 !important;
+    border: 1px solid #4CAF50 !important;
+    border-radius: 4px !important;
+    padding: 8px 12px !important;
+    font-size: 0.85rem !important;
+}
+
+@media (max-width: 768px) {
+    .anki-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .anki-heatmap-container {
+        padding: 1rem;
+    }
+
+    #cal-heatmap {
+        overflow-x: scroll;
+    }
+}
+</style>
+
+<script>
+(function() {
+    const loadingEl = document.getElementById('heatmap-loading');
+    const errorEl = document.getElementById('heatmap-error');
+
+    
+    fetch('/data/anki-stats.json')
+        .then(response => {
+            if (!response.ok) throw new Error('Failed to fetch data');
+            return response.json();
+        })
+        .then(data => {
+            loadingEl.style.display = 'none';
+
+            
+            document.getElementById('current-streak').textContent = data.metadata.current_streak;
+            document.getElementById('longest-streak').textContent = data.metadata.longest_streak;
+            document.getElementById('total-reviews').textContent = data.metadata.total_reviews.toLocaleString();
+
+            
+            const heatmapData = {};
+            for (const [date, count] of Object.entries(data.daily_reviews)) {
+                
+                heatmapData[Math.floor(new Date(date).getTime() / 1000)] = count;
+            }
+
+            
+            const maxReviews = Math.max(...Object.values(data.daily_reviews));
+
+            
+            const cal = new CalHeatMap();
+            cal.init({
+                itemSelector: '#cal-heatmap',
+                domain: 'month',
+                subDomain: 'day',
+                data: heatmapData,
+                start: new Date(new Date().setMonth(new Date().getMonth() - 11)),
+                cellSize: 12,
+                cellPadding: 3,
+                cellRadius: 2,
+                range: 12,
+                legend: [1, Math.floor(maxReviews * 0.25), Math.floor(maxReviews * 0.5), Math.floor(maxReviews * 0.75)],
+                legendColors: {
+                    min: 'rgba(255, 255, 255, 0.05)',
+                    max: 'rgba(76, 175, 80, 1)',
+                    empty: 'rgba(255, 255, 255, 0.05)'
+                },
+                displayLegend: false,
+                label: {
+                    position: 'top'
+                },
+                subDomainTextFormat: '%d',
+                subDomainTitleFormat: {
+                    empty: 'No reviews on {date}',
+                    filled: '{count} reviews on {date}'
+                },
+                domainLabelFormat: '%b',
+                tooltip: true,
+                onClick: function(date, count) {
+                    
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error loading Anki stats:', error);
+            loadingEl.style.display = 'none';
+            errorEl.style.display = 'block';
+        });
+})();
+</script>
+
+
                     
                         <div class="socialNavbar">
     <ul>
