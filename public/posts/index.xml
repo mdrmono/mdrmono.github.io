@@ -6,6 +6,14 @@
     <description>Recent content in Posts on My New Hugo Site</description>
     <generator>Hugo</generator>
     <language>en-us</language>
+    <lastBuildDate>Tue, 21 Oct 2025 15:31:10 -0500</lastBuildDate>
     <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Hello World!</title>
+      <link>http://localhost:1313/posts/hello-world/</link>
+      <pubDate>Tue, 21 Oct 2025 15:31:10 -0500</pubDate>
+      <guid>http://localhost:1313/posts/hello-world/</guid>
+      <description>&lt;p&gt;When I left Peru for university back in 2022, I gradually abandoned my Mandarin study habits. Even though I had Mandarin classes at school, I couldn&amp;rsquo;t keep myself motivated to keep up with the grueling grind that is studying a foreign language. Looking back, my tracking system wasn&amp;rsquo;t strong enough and I didn&amp;rsquo;t have many sources of motivation. I&amp;rsquo;ve always wanted to have a blog where I could keep a backlog of my progress, so here it is! I really hope this can keep me on track this time.&lt;/p&gt;</description>
+    </item>
   </channel>
 </rss>

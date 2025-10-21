@@ -64,27 +64,31 @@
     margin: 0 0 0.5rem 0;
     font-size: 1.4rem;
     color: #e0e0e0;
+    text-align: center; /* center the visualization title */
 }
 
 .stats-and-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
+    gap: 1rem; /* tighter to fit on one line */
+    flex-wrap: nowrap; /* force single line on wide screens */
 }
 
 .anki-stats {
     display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
+    gap: 1.25rem;
+    flex-wrap: nowrap; /* keep all stats on one line */
     font-size: 0.9rem;
-    flex: 1;
+    flex: 1 1 auto; /* allow shrinking */
+    min-width: 0; /* enable flexbox shrink */
 }
 
 .stat-item {
     display: flex;
     gap: 0.5rem;
     color: #b0b0b0;
+    white-space: nowrap; /* prevent wrapping inside items */
 }
 
 .stat-label {

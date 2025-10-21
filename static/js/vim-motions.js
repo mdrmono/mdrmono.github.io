@@ -110,13 +110,89 @@
     return tagName === 'input' || tagName === 'textarea' || activeElement.isContentEditable;
   }
 
-  // Scroll functions
+  // Scroll functions (fast + fluent with acceleration + smooth rAF)
+  let lastScrollKey = null; // 'down' | 'up'
+  let lastScrollAt = 0;
+  let speedMultiplier = 1;
+  let activeAnim = null; // { startTime, duration, startY, endY, rafId, lastInput }
+
+  function baseStep() {
+    // Use a fraction of the viewport for snappy movement
+    return Math.max(70, Math.round(window.innerHeight * 0.14));
+  }
+
+  function accelStep(direction) {
+    const now = performance.now();
+    if (lastScrollKey === direction && (now - lastScrollAt) < 220) {
+      // Accelerate on quick repeats; cap multiplier
+      speedMultiplier = Math.min(speedMultiplier * 1.18, 3.6);
+    } else {
+      speedMultiplier = 1;
+    }
+    lastScrollKey = direction;
+    lastScrollAt = now;
+    return Math.round(baseStep() * speedMultiplier);
+  }
+
+  function clampTarget(y) {
+    const max = Math.max(0, (document.documentElement.scrollHeight || document.body.scrollHeight) - window.innerHeight);
+    return Math.min(max, Math.max(0, y));
+  }
+
+  function animateScrollBy(delta) {
+    const now = performance.now();
+    const currentY = window.scrollY || window.pageYOffset || 0;
+    const duration = 160; // ms per burst
+
+    // If an animation is in progress and inputs are close together, merge them
+    if (activeAnim && (now - activeAnim.lastInput) < 200) {
+      activeAnim.endY = clampTarget(activeAnim.endY + delta);
+      activeAnim.startY = currentY; // continue from current position
+      activeAnim.startTime = now;
+      activeAnim.lastInput = now;
+      return;
+    }
+
+    if (activeAnim && activeAnim.rafId) {
+      cancelAnimationFrame(activeAnim.rafId);
+    }
+
+    activeAnim = {
+      startTime: now,
+      duration,
+      startY: currentY,
+      endY: clampTarget(currentY + delta),
+      rafId: 0,
+      lastInput: now,
+    };
+
+    const easeOutQuad = (t) => 1 - (1 - t) * (1 - t);
+
+    const stepFn = (ts) => {
+      if (!activeAnim) return;
+      const t = Math.min(1, (ts - activeAnim.startTime) / activeAnim.duration);
+      const eased = easeOutQuad(t);
+      const y = activeAnim.startY + (activeAnim.endY - activeAnim.startY) * eased;
+      window.scrollTo(0, y);
+
+      if (t < 1) {
+        activeAnim.rafId = requestAnimationFrame(stepFn);
+      } else {
+        activeAnim = null;
+      }
+    };
+
+    activeAnim.rafId = requestAnimationFrame(stepFn);
+  }
+
   function scrollDown() {
-    window.scrollBy({ top: 60, behavior: 'smooth' });
+    const step = accelStep('down');
+    animateScrollBy(step);
   }
 
   function scrollUp() {
-    window.scrollBy({ top: -60, behavior: 'smooth' });
+    const step = accelStep('up');
+    animateScrollBy(-step);
   }
 
   function scrollLeft() {
