@@ -43,23 +43,26 @@
 <!-- Cal-Heatmap Library v4 -->
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://cdn.jsdelivr.net/npm/cal-heatmap@4/dist/cal-heatmap.min.js"></script>
+<!-- Tooltip plugin requires Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cal-heatmap@4/dist/plugins/Tooltip.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@4/dist/cal-heatmap.css">
 
 <style>
 .anki-heatmap-container {
-    margin: 2rem 0;
+    margin: 1rem 0;
     padding: 1.5rem;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 8px;
 }
 
 .anki-heatmap-header {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .anki-heatmap-header h2 {
-    margin: 0 0 1rem 0;
-    font-size: 1.5rem;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.4rem;
     color: #e0e0e0;
 }
 
@@ -67,7 +70,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
 }
 
 .anki-stats {
@@ -137,38 +140,12 @@
 }
 
 #cal-heatmap {
-    margin: 1rem 0;
-    overflow: visible;
-    transform-origin: center top;
-    min-height: 200px;
-    height: 200px;
+    margin: 0.5rem 0;
+    overflow: hidden; /* Contain any overflow */
     width: 100%;
-    display: block;
-}
-
-/* Responsive scaling for heatmap */
-@media (max-width: 1400px) {
-    #cal-heatmap {
-        transform: scale(0.9);
-    }
-}
-
-@media (max-width: 1200px) {
-    #cal-heatmap {
-        transform: scale(0.8);
-    }
-}
-
-@media (max-width: 1000px) {
-    #cal-heatmap {
-        transform: scale(0.7);
-    }
-}
-
-@media (max-width: 800px) {
-    #cal-heatmap {
-        transform: scale(0.6);
-    }
+    display: flex; /* Center inner SVG */
+    justify-content: center;
+    contain: layout paint; /* Keep effects contained */
 }
 
 /* Hide the Cal-Heatmap's built-in navigation slider */
@@ -178,9 +155,23 @@
     display: none !important;
 }
 
+/* Hide built-in month domain labels thoroughly */
+#cal-heatmap .graph-label,
+#cal-heatmap .graph-label-text,
+#cal-heatmap .graph-label-bg,
+#cal-heatmap .ch-plugin-calendar-label,
+#cal-heatmap .ch-plugin-calendar-label-text,
+#cal-heatmap .ch-plugin-calendar-label-bg,
+#cal-heatmap [class*="graph-label"],
+#cal-heatmap [class*="calendar-label"] {
+    display: none !important;
+}
+
 /* GitHub-style heatmap styling */
 #cal-heatmap svg {
-    overflow: visible;
+    overflow: visible; /* Allow tooltips positioning; container still clips */
+    display: block;
+    margin: 0 auto; /* Ensure centering fallback */
 }
 
 #cal-heatmap text {
@@ -188,10 +179,9 @@
     font-size: 0.75rem;
 }
 
-/* Ensure cells are visible */
+/* Ensure consistent cell spacing: rely on gutter, not stroke */
 #cal-heatmap rect {
-    stroke: rgba(0, 0, 0, 0.1);
-    stroke-width: 1px;
+    stroke: none; /* Avoid visual extra spacing from strokes */
     shape-rendering: crispEdges;
 }
 
@@ -209,7 +199,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     font-size: 0.85rem;
     color: #b0b0b0;
 }
@@ -277,6 +267,8 @@
     font-size: 0.85rem !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
 }
+
+/* No animation styles */
 
 @media (max-width: 768px) {
     .stats-and-nav {
@@ -369,8 +361,33 @@ window.addEventListener('load', function() {
             // Add small delay to ensure DOM is fully rendered
             await new Promise(resolve => setTimeout(resolve, 100));
 
+            // Compute responsive cell size from actual column count
+            const weekStart = 0; // matches date.locale.weekStart below (0: Sun)
+            const domainGutter = 2; // remove gaps between months
+            const desiredGutter = 2; // between cells
+            const available = container.offsetWidth || 900;
+
+            // Determine first column (start of the first week) and last column (end of last week)
+            const yearStart = new Date(startDate.getFullYear(), 0, 1);
+            const yearEnd = new Date(startDate.getFullYear(), 11, 31);
+            const startDay = yearStart.getDay();
+            const offsetToWeekStart = (7 + (startDay - weekStart)) % 7; // days back to previous weekStart
+            const displayStart = new Date(yearStart);
+            displayStart.setDate(yearStart.getDate() - offsetToWeekStart);
+            const endDay = yearEnd.getDay();
+            const offsetToWeekEnd = (6 - ((7 + (endDay - weekStart)) % 7)); // days forward to week end (Sat when weekStart=Sun)
+            const displayEnd = new Date(yearEnd);
+            displayEnd.setDate(yearEnd.getDate() + offsetToWeekEnd);
+            const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
+            const weeksInView = Math.round((displayEnd - displayStart) / MS_PER_WEEK) + 1; // inclusive
+
+            // Reserve space only for inter-cell gutters (no month gaps)
+            const totalGutters = (weeksInView - 1) * desiredGutter;
+            // Use as much width as possible while keeping whole-pixel cells
+            const cellWidth = Math.max(10, Math.min(18, Math.floor((available - totalGutters) / weeksInView)));
+
             try {
-                await cal.paint({
+                const options = {
                     itemSelector: '#cal-heatmap',
                     data: {
                         source: heatmapData,
@@ -380,20 +397,24 @@ window.addEventListener('load', function() {
                     },
                     date: {
                         start: startDate,
-                        locale: { weekStart: 0 }
+                        locale: { weekStart }
                     },
                     range: 12,
                     domain: {
                         type: 'month',
-                        gutter: 4,
-                        label: null
+                        gutter: domainGutter,
+                        label: {
+                            // Remove visible labels and their reserved space
+                            text: () => '',
+                            height: 0
+                        }
                     },
                     subDomain: {
                         type: 'ghDay',
-                        radius: 2,
-                        width: 11,
-                        height: 11,
-                        gutter: 3
+                        radius: 1,
+                        width: cellWidth,
+                        height: cellWidth,
+                        gutter: desiredGutter
                     },
                     scale: {
                         color: {
@@ -403,8 +424,54 @@ window.addEventListener('load', function() {
                         }
                     },
                     animationDuration: 0
-                });
+                };
+
+                const plugins = [];
+                const TooltipPlugin = (typeof Tooltip !== 'undefined')
+                    ? Tooltip
+                    : (CalHeatmap && CalHeatmap.plugins ? CalHeatmap.plugins.Tooltip : undefined);
+                if (TooltipPlugin && typeof window !== 'undefined' && window.Popper && window.Popper.createPopper) {
+                    plugins.push([
+                        TooltipPlugin,
+                        {
+                            text: function(date, value) {
+                                const d = (date instanceof Date) ? date : new Date(date);
+                                const formatted = new Intl.DateTimeFormat(undefined, {
+                                    weekday: 'short', month: 'long', day: 'numeric', year: 'numeric'
+                                }).format(d);
+                                const count = (typeof value === 'number' ? value : 0);
+                                return `${formatted} — ${count} reviews`;
+                            }
+                        }
+                    ]);
+                }
+
+                await cal.paint(options, plugins);
                 console.log('Heatmap painted successfully');
+
+                // Fallback tooltip if plugin is missing
+                if (!TooltipPlugin || !(typeof window !== 'undefined' && window.Popper && window.Popper.createPopper)) {
+                    try {
+                        const cells = document.querySelectorAll('#cal-heatmap rect');
+                        cells.forEach((cell) => {
+                            const ds = cell.dataset || {};
+                            let ts = ds.timestamp || ds.time || ds.date || cell.getAttribute('data-timestamp');
+                            let val = ds.value || cell.getAttribute('data-value');
+                            let d;
+                            if (ts) {
+                                const n = Number(ts);
+                                d = isNaN(n) ? new Date(ts) : new Date(n > 1e12 ? n : n * 1000);
+                            }
+                            const formatted = d ? new Intl.DateTimeFormat(undefined, {
+                                weekday: 'short', month: 'long', day: 'numeric', year: 'numeric'
+                            }).format(d) : 'Unknown date';
+                            const count = (val !== undefined && val !== null) ? Number(val) : 0;
+                            cell.setAttribute('title', `${formatted} — ${count} reviews`);
+                        });
+                    } catch (e) {
+                        console.warn('Tooltip fallback failed:', e);
+                    }
+                }
 
                 // Setup navigation controls
                 const prevButton = document.getElementById('heatmap-prev');
@@ -435,7 +502,7 @@ window.addEventListener('load', function() {
                     updateButtonStates();
 
                     // Previous year
-                    prevButton.addEventListener('click', () => {
+                    prevButton.addEventListener('click', async () => {
                         if (currentYear > minYear) {
                             currentYear--;
                             const newDate = new Date(currentYear, 0, 1);
@@ -446,7 +513,7 @@ window.addEventListener('load', function() {
                     });
 
                     // Next year
-                    nextButton.addEventListener('click', () => {
+                    nextButton.addEventListener('click', async () => {
                         if (currentYear < maxYear) {
                             currentYear++;
                             const newDate = new Date(currentYear, 0, 1);
