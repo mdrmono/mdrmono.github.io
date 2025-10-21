@@ -2,19 +2,26 @@
 <div class="anki-heatmap-container">
     <div class="anki-heatmap-header">
         <h2>Mandarin Study Streak</h2>
-        <div class="anki-stats">
-            <span class="stat-item">
-                <span class="stat-label">Current Streak:</span>
-                <span class="stat-value" id="current-streak">-</span> days
-            </span>
-            <span class="stat-item">
-                <span class="stat-label">Longest Streak:</span>
-                <span class="stat-value" id="longest-streak">-</span> days
-            </span>
-            <span class="stat-item">
-                <span class="stat-label">Total Reviews:</span>
-                <span class="stat-value" id="total-reviews">-</span>
-            </span>
+        <div class="stats-and-nav">
+            <div class="anki-stats">
+                <span class="stat-item">
+                    <span class="stat-label">Current Streak:</span>
+                    <span class="stat-value" id="current-streak">-</span> days
+                </span>
+                <span class="stat-item">
+                    <span class="stat-label">Longest Streak:</span>
+                    <span class="stat-value" id="longest-streak">-</span> days
+                </span>
+                <span class="stat-item">
+                    <span class="stat-label">Total Reviews:</span>
+                    <span class="stat-value" id="total-reviews">-</span>
+                </span>
+            </div>
+            <div class="heatmap-navigation">
+                <button id="heatmap-prev" class="nav-button" title="Previous year">‹</button>
+                <span id="heatmap-year" class="nav-year">2024</span>
+                <button id="heatmap-next" class="nav-button" title="Next year">›</button>
+            </div>
         </div>
     </div>
     <div id="cal-heatmap"></div>
@@ -33,10 +40,10 @@
     <div id="heatmap-error" class="error-message" style="display: none;">Failed to load study data.</div>
 </div>
 
-<!-- Cal-Heatmap Library -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@4.2.4/cal-heatmap.css">
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/cal-heatmap@4.2.4/cal-heatmap.min.js"></script>
+<!-- Cal-Heatmap Library v4 -->
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/cal-heatmap@4/dist/cal-heatmap.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@4/dist/cal-heatmap.css">
 
 <style>
 .anki-heatmap-container {
@@ -56,11 +63,19 @@
     color: #e0e0e0;
 }
 
+.stats-and-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
 .anki-stats {
     display: flex;
     gap: 2rem;
     flex-wrap: wrap;
     font-size: 0.9rem;
+    flex: 1;
 }
 
 .stat-item {
@@ -78,9 +93,116 @@
     color: #4CAF50;
 }
 
+.heatmap-navigation {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.nav-button {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #b0b0b0;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-button:hover:not(:disabled) {
+    background: rgba(57, 211, 83, 0.2);
+    border-color: #39d353;
+    color: #39d353;
+}
+
+.nav-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.nav-year {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #e0e0e0;
+    min-width: 50px;
+    text-align: center;
+    line-height: 1;
+}
+
 #cal-heatmap {
     margin: 1rem 0;
-    overflow-x: auto;
+    overflow: visible;
+    transform-origin: center top;
+    min-height: 200px;
+    height: 200px;
+    width: 100%;
+    display: block;
+}
+
+/* Responsive scaling for heatmap */
+@media (max-width: 1400px) {
+    #cal-heatmap {
+        transform: scale(0.9);
+    }
+}
+
+@media (max-width: 1200px) {
+    #cal-heatmap {
+        transform: scale(0.8);
+    }
+}
+
+@media (max-width: 1000px) {
+    #cal-heatmap {
+        transform: scale(0.7);
+    }
+}
+
+@media (max-width: 800px) {
+    #cal-heatmap {
+        transform: scale(0.6);
+    }
+}
+
+/* Hide the Cal-Heatmap's built-in navigation slider */
+#cal-heatmap .ch-plugin-scroll,
+#cal-heatmap .ch-domain-scroll,
+#cal-heatmap input[type="range"] {
+    display: none !important;
+}
+
+/* GitHub-style heatmap styling */
+#cal-heatmap svg {
+    overflow: visible;
+}
+
+#cal-heatmap text {
+    fill: #b0b0b0 !important;
+    font-size: 0.75rem;
+}
+
+/* Ensure cells are visible */
+#cal-heatmap rect {
+    stroke: rgba(0, 0, 0, 0.1);
+    stroke-width: 1px;
+    shape-rendering: crispEdges;
+}
+
+/* CalendarLabel plugin styling */
+#cal-heatmap .ch-plugin-calendar-label-text {
+    fill: #b0b0b0 !important;
+    font-size: 0.7rem;
+}
+
+#cal-heatmap .ch-plugin-calendar-label-bg {
+    fill: transparent;
 }
 
 .heatmap-legend {
@@ -104,23 +226,23 @@
 }
 
 .legend-box.level-0 {
-    background: rgba(255, 255, 255, 0.05);
+    background: #161b22;
 }
 
 .legend-box.level-1 {
-    background: rgba(76, 175, 80, 0.3);
+    background: #0e4429;
 }
 
 .legend-box.level-2 {
-    background: rgba(76, 175, 80, 0.5);
+    background: #006d32;
 }
 
 .legend-box.level-3 {
-    background: rgba(76, 175, 80, 0.7);
+    background: #26a641;
 }
 
 .legend-box.level-4 {
-    background: rgba(76, 175, 80, 1);
+    background: #39d353;
 }
 
 .loading-message {
@@ -147,15 +269,26 @@
 
 /* Tooltip styling */
 .ch-tooltip {
-    background: rgba(0, 0, 0, 0.9) !important;
+    background: rgba(0, 0, 0, 0.95) !important;
     color: #e0e0e0 !important;
-    border: 1px solid #4CAF50 !important;
-    border-radius: 4px !important;
+    border: 1px solid #39d353 !important;
+    border-radius: 6px !important;
     padding: 8px 12px !important;
     font-size: 0.85rem !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
 }
 
 @media (max-width: 768px) {
+    .stats-and-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .heatmap-navigation {
+        align-self: center;
+    }
+
     .anki-stats {
         flex-direction: column;
         gap: 0.5rem;
@@ -164,17 +297,27 @@
     .anki-heatmap-container {
         padding: 1rem;
     }
-
-    #cal-heatmap {
-        overflow-x: scroll;
-    }
 }
 </style>
 
 <script>
-(function() {
+// Wait for CalHeatMap to load before executing
+window.addEventListener('load', function() {
     const loadingEl = document.getElementById('heatmap-loading');
     const errorEl = document.getElementById('heatmap-error');
+
+    // Check if CalHeatmap is available
+    console.log('Checking libraries:', {
+        CalHeatmap: typeof CalHeatmap,
+        d3: typeof d3
+    });
+
+    if (typeof CalHeatmap === 'undefined') {
+        console.error('CalHeatmap library failed to load');
+        loadingEl.style.display = 'none';
+        errorEl.style.display = 'block';
+        return;
+    }
 
     // Fetch Anki stats data
     fetch('/data/anki-stats.json')
@@ -182,7 +325,8 @@
             if (!response.ok) throw new Error('Failed to fetch data');
             return response.json();
         })
-        .then(data => {
+        .then(async (data) => {
+            console.log('Data loaded successfully:', data);
             loadingEl.style.display = 'none';
 
             // Update stats
@@ -190,54 +334,140 @@
             document.getElementById('longest-streak').textContent = data.metadata.longest_streak;
             document.getElementById('total-reviews').textContent = data.metadata.total_reviews.toLocaleString();
 
-            // Transform data for cal-heatmap
-            const heatmapData = {};
+            // Transform data for cal-heatmap v4 format
+            const heatmapData = [];
             for (const [date, count] of Object.entries(data.daily_reviews)) {
-                // Convert to timestamp (seconds)
-                heatmapData[Math.floor(new Date(date).getTime() / 1000)] = count;
+                heatmapData.push({ date: date, value: count });
             }
+
+            console.log('Transformed data sample:', heatmapData.slice(0, 5));
 
             // Calculate max value for color scale
             const maxReviews = Math.max(...Object.values(data.daily_reviews));
+            console.log('Max reviews:', maxReviews);
 
-            // Initialize cal-heatmap
-            const cal = new CalHeatMap();
-            cal.init({
-                itemSelector: '#cal-heatmap',
-                domain: 'month',
-                subDomain: 'day',
-                data: heatmapData,
-                start: new Date(new Date().setMonth(new Date().getMonth() - 11)),
-                cellSize: 12,
-                cellPadding: 3,
-                cellRadius: 2,
-                range: 12,
-                legend: [1, Math.floor(maxReviews * 0.25), Math.floor(maxReviews * 0.5), Math.floor(maxReviews * 0.75)],
-                legendColors: {
-                    min: 'rgba(255, 255, 255, 0.05)',
-                    max: 'rgba(76, 175, 80, 1)',
-                    empty: 'rgba(255, 255, 255, 0.05)'
-                },
-                displayLegend: false,
-                label: {
-                    position: 'top'
-                },
-                subDomainTextFormat: '%d',
-                subDomainTitleFormat: {
-                    empty: 'No reviews on {date}',
-                    filled: '{count} reviews on {date}'
-                },
-                domainLabelFormat: '%b',
-                tooltip: true,
-                onClick: function(date, count) {
-                    // Optional: Add click handler for future features
-                }
+            // Get the most recent date from the data
+            const dates = Object.keys(data.daily_reviews).map(d => new Date(d));
+            const maxDate = new Date(Math.max(...dates));
+
+            // Initialize cal-heatmap v4
+            const cal = new CalHeatmap();
+            console.log('CalHeatmap instance created');
+
+            // Calculate start date (beginning of the most recent year with data)
+            const startDate = new Date(maxDate.getFullYear(), 0, 1);
+            console.log('Start date:', startDate, 'Most recent data:', maxDate);
+
+            // Ensure the container exists and has dimensions
+            const container = document.getElementById('cal-heatmap');
+            console.log('Container dimensions:', {
+                width: container.offsetWidth,
+                height: container.offsetHeight,
+                exists: !!container
             });
+
+            // Add small delay to ensure DOM is fully rendered
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            try {
+                await cal.paint({
+                    itemSelector: '#cal-heatmap',
+                    data: {
+                        source: heatmapData,
+                        x: 'date',
+                        y: 'value',
+                        defaultValue: 0
+                    },
+                    date: {
+                        start: startDate,
+                        locale: { weekStart: 0 }
+                    },
+                    range: 12,
+                    domain: {
+                        type: 'month',
+                        gutter: 4,
+                        label: null
+                    },
+                    subDomain: {
+                        type: 'ghDay',
+                        radius: 2,
+                        width: 11,
+                        height: 11,
+                        gutter: 3
+                    },
+                    scale: {
+                        color: {
+                            type: 'threshold',
+                            range: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
+                            domain: [1, Math.floor(maxReviews * 0.25), Math.floor(maxReviews * 0.5), Math.floor(maxReviews * 0.75)]
+                        }
+                    },
+                    animationDuration: 0
+                });
+                console.log('Heatmap painted successfully');
+
+                // Setup navigation controls
+                const prevButton = document.getElementById('heatmap-prev');
+                const nextButton = document.getElementById('heatmap-next');
+                const yearDisplay = document.getElementById('heatmap-year');
+
+                if (prevButton && nextButton && yearDisplay) {
+                    let currentYear = startDate.getFullYear();
+
+                    // Update year display
+                    const updateYearDisplay = () => {
+                        yearDisplay.textContent = currentYear;
+                    };
+                    updateYearDisplay();
+
+                    // Get min/max dates from data
+                    const dates = Object.keys(data.daily_reviews).map(d => new Date(d));
+                    const minYear = Math.min(...dates.map(d => d.getFullYear()));
+                    const maxYear = Math.max(...dates.map(d => d.getFullYear()));
+
+                    console.log('Year range:', minYear, 'to', maxYear);
+
+                    // Update button states
+                    const updateButtonStates = () => {
+                        prevButton.disabled = currentYear <= minYear;
+                        nextButton.disabled = currentYear >= maxYear;
+                    };
+                    updateButtonStates();
+
+                    // Previous year
+                    prevButton.addEventListener('click', () => {
+                        if (currentYear > minYear) {
+                            currentYear--;
+                            const newDate = new Date(currentYear, 0, 1);
+                            cal.jumpTo(newDate);
+                            updateYearDisplay();
+                            updateButtonStates();
+                        }
+                    });
+
+                    // Next year
+                    nextButton.addEventListener('click', () => {
+                        if (currentYear < maxYear) {
+                            currentYear++;
+                            const newDate = new Date(currentYear, 0, 1);
+                            cal.jumpTo(newDate);
+                            updateYearDisplay();
+                            updateButtonStates();
+                        }
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error painting heatmap:', error);
+                errorEl.style.display = 'block';
+                errorEl.textContent = 'Failed to render heatmap: ' + error.message;
+            }
         })
         .catch(error => {
             console.error('Error loading Anki stats:', error);
             loadingEl.style.display = 'none';
             errorEl.style.display = 'block';
+            errorEl.textContent = 'Failed to load study data: ' + error.message;
         });
-})();
+});
 </script>
