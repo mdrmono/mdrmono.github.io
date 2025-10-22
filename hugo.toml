@@ -36,13 +36,13 @@ aria = "GitHub Profile"
 [[params.social]]
 key = 0
 name = "codeforces"
-url = "https://codeforces.com/profile/mdrmono"
+url = "https://www.youtube.com/watch?v=cpTgC-ma-Nc"
 target = "_blank"
 aria = "Codeforces Profile"
 
 [[params.social]]
 key = 0
 name = "linkedin"
-url = "https://www.linkedin.com/in/manuel-delfin-973589186/"
+url = "https://www.youtube.com/watch?v=ldxQA9W2474"
 target = "_blank"
 aria = "Linkedin Profile"
