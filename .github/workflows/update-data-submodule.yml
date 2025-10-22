@@ -1,0 +1,53 @@
+name: Update Data Submodule
+
+on:
+  schedule:
+    # Run daily at 2:10 AM UTC
+    - cron: '10 2 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update-submodule:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: true
+
+      - name: Update data submodule to latest
+        run: |
+          git submodule update --remote static/data
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet static/data; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No submodule changes detected"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Submodule changes detected"
+          fi
+
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+          DATA_DATE=$(date +"%Y-%m-%d")
+          git add static/data
+          git commit -m "Update data submodule - ${DATA_DATE}"
+          git push
+
+      - name: Report status
+        if: always()
+        run: |
+          if [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
+            echo "✅ Data submodule updated successfully"
+          else
+            echo "ℹ️  No changes to commit"
+          fi
