@@ -8,5 +8,5 @@ icon = "anki.webp"
 
 {{< anki-heatmap >}}
 
-Small visualization I made to display your anki streak to the world! As you can see its a struggle.
+Small visualization I made to display your anki streak to the world!
 
