@@ -303,11 +303,6 @@ window.addEventListener('load', function() {
     const errorEl = document.getElementById('heatmap-error');
 
     // Check if CalHeatmap is available
-    console.log('Checking libraries:', {
-        CalHeatmap: typeof CalHeatmap,
-        d3: typeof d3
-    });
-
     if (typeof CalHeatmap === 'undefined') {
         console.error('CalHeatmap library failed to load');
         loadingEl.style.display = 'none';
@@ -322,7 +317,6 @@ window.addEventListener('load', function() {
             return response.json();
         })
         .then(async (data) => {
-            console.log('Data loaded successfully:', data);
             loadingEl.style.display = 'none';
 
             // Update stats
@@ -336,11 +330,8 @@ window.addEventListener('load', function() {
                 heatmapData.push({ date: date, value: count });
             }
 
-            console.log('Transformed data sample:', heatmapData.slice(0, 5));
-
             // Calculate max value for color scale
             const maxReviews = Math.max(...Object.values(data.daily_reviews));
-            console.log('Max reviews:', maxReviews);
 
             // Get the most recent date from the data
             const dates = Object.keys(data.daily_reviews).map(d => new Date(d));
@@ -348,19 +339,12 @@ window.addEventListener('load', function() {
 
             // Initialize cal-heatmap v4
             const cal = new CalHeatmap();
-            console.log('CalHeatmap instance created');
 
             // Calculate start date (beginning of the most recent year with data)
             const startDate = new Date(maxDate.getFullYear(), 0, 1);
-            console.log('Start date:', startDate, 'Most recent data:', maxDate);
 
             // Ensure the container exists and has dimensions
             const container = document.getElementById('cal-heatmap');
-            console.log('Container dimensions:', {
-                width: container.offsetWidth,
-                height: container.offsetHeight,
-                exists: !!container
-            });
 
             // Add small delay to ensure DOM is fully rendered
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -451,7 +435,6 @@ window.addEventListener('load', function() {
                 }
 
                 await cal.paint(options, plugins);
-                console.log('Heatmap painted successfully');
 
                 // Fallback tooltip if plugin is missing
                 if (!TooltipPlugin || !(typeof window !== 'undefined' && window.Popper && window.Popper.createPopper)) {
@@ -473,7 +456,7 @@ window.addEventListener('load', function() {
                             cell.setAttribute('title', `${formatted} — ${count} reviews`);
                         });
                     } catch (e) {
-                        console.warn('Tooltip fallback failed:', e);
+                        // Tooltip fallback failed silently
                     }
                 }
 
@@ -495,8 +478,6 @@ window.addEventListener('load', function() {
                     const dates = Object.keys(data.daily_reviews).map(d => new Date(d));
                     const minYear = Math.min(...dates.map(d => d.getFullYear()));
                     const maxYear = Math.max(...dates.map(d => d.getFullYear()));
-
-                    console.log('Year range:', minYear, 'to', maxYear);
 
                     // Update button states
                     const updateButtonStates = () => {
