@@ -16,7 +16,7 @@ theme = 'nightfall'
 
 [params]
 published = false
-footerHtml = 'Thanks to <a href="https://gohugo.io" class="footerLink">Hugo</a> and <a href="https://github.com/LordMathis/hugo-theme-nightfall" class="footerLink">Nightfall</a> '
+footerHtml = 'Powered by <a href="https://gohugo.io" class="footerLink">Hugo</a> and <a href="https://github.com/LordMathis/hugo-theme-nightfall" class="footerLink">Nightfall</a> '
 
 
 [params.author]
