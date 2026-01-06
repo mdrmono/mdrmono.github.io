@@ -14,10 +14,6 @@ Thumbs.db
 *.swo
 *~
 
-# Git submodule content (managed separately)
-# The anki-stats.json is managed by the anki-stats-data submodule
-static/data/anki-stats.json
-
 # Logs
 *.log
 
