@@ -9,8 +9,12 @@ theme = 'nightfall'
     weight = 0
     url = "/posts"
   [[menu.header]]
+    name = "cv"
+    weight = 1
+    url = "/cv/cv.html"
+  [[menu.header]]
     name = "home"
-    weight = 0
+    weight = 2
     url = "/"
 
 
