@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}">
+
+<head>
+    <title>
+        {{ i18n "home" }} | {{ .Site.Params.author.name }}
+    </title>
+
+    {{ partial "head.html" . }}
+
+</head>
+
+<body>
+
+    <div class="flexWrapper">
+        {{ partial "header.html" . }}
+
+        <div class="content vertical">
+            <main class="main">
+                <div class="indexWrapper">
+                    {{ if .Site.Params.author.avatarFirst }}
+                        {{ partial "avatar.html" . }}
+                    {{ end }}
+                    <div>
+                        <h1 class="indexHeader"> Hi! </h1>
+                        <p>My name is Manuel. I'm a CS student and currently study Mandarin in my free time.</p>
+                    </div>
+                    {{ if not .Site.Params.author.avatarFirst }}
+                        {{ partial "avatar.html" . }}
+                    {{ end }}
+
+                    <!-- Heatmap moved to blog post; removed from homepage -->
+
+                    {{ if isset .Site.Params "social" }}
+                        {{ partial "social.html" . }}
+                    {{ end }}
+                </div>
+            </main>
+        </div>
+
+
+        {{ partial "footer.html" . }}
+    </div>
+
+</body>
+
+</html>

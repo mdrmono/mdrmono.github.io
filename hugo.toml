@@ -1,0 +1,52 @@
+baseURL = 'https://mdrmono.github.io/'
+languageCode = 'en-us'
+title = 'Manuel'
+theme = 'nightfall'
+
+[menu]
+  [[menu.header]]
+    name = "posts"
+    weight = 0
+    url = "/posts"
+  [[menu.header]]
+    name = "cv"
+    weight = 1
+    url = "/cv/cv.en.html"
+  [[menu.header]]
+    name = "home"
+    weight = 2
+    url = "/"
+
+
+[params]
+published = false
+footerHtml = 'Powered by <a href="https://gohugo.io" class="footerLink">Hugo</a> and <a href="https://github.com/LordMathis/hugo-theme-nightfall" class="footerLink">Nightfall</a> '
+
+
+[params.author]
+name = "Manuel"
+avatarFirst = false
+
+readingTime = true  # Show reading time on post page
+published = true  # Show published data on post page
+
+[[params.social]]
+key = 0
+name = "github"
+url = "https://github.com/mdrmono"
+target = "_blank"
+aria = "GitHub Profile"
+
+[[params.social]]
+key = 0
+name = "codeforces"
+url = "https://www.youtube.com/watch?v=cpTgC-ma-Nc"
+target = "_blank"
+aria = "Codeforces Profile"
+
+[[params.social]]
+key = 0
+name = "linkedin"
+url = "https://www.youtube.com/watch?v=ldxQA9W2474"
+target = "_blank"
+aria = "Linkedin Profile"

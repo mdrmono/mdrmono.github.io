@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV - Anonymous Candidate</title>
+    <style>
+        :root {
+            --bg: #292a2d;
+            --bg-alt: #252627;
+            --panel: #2f2f2f;
+            --text: #f8f8ff;
+            --muted: #c7c7c7;
+            --accent: #80AADD;
+            --border: #3c3f44;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: "Open Sans", "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.45;
+            color: var(--text);
+            background: var(--bg);
+            font-size: 10.5pt;
+        }
+
+        .container {
+            width: min(210mm, 92vw);
+            min-height: 297mm;
+            padding: 18mm 20mm;
+            margin: 24px auto;
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        header {
+            position: relative;
+            text-align: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        h1 {
+            font-size: 24pt;
+            color: var(--text);
+            margin-bottom: 6px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+        }
+
+        .contact {
+            font-size: 10pt;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .contact a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .lang-toggle {
+            position: absolute;
+            right: 0;
+            top: 0;
+            font-size: 9.5pt;
+            color: var(--muted);
+        }
+
+        .lang-toggle a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .lang-toggle span {
+            margin: 0 6px;
+            color: var(--muted);
+        }
+
+        .summary {
+            font-size: 10pt;
+            text-align: justify;
+            margin-bottom: 16px;
+            padding: 10px 14px;
+            background: var(--panel);
+            border-left: 3px solid var(--accent);
+            color: var(--muted);
+        }
+
+        h2 {
+            font-size: 12pt;
+            color: var(--accent);
+            margin-top: 14px;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 0.9px;
+            font-weight: 700;
+        }
+
+        .education-item, .experience-item, .activity-item {
+            margin-bottom: 10px;
+            page-break-inside: avoid;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 2px;
+        }
+
+        .institution {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 10.7pt;
+        }
+
+        .meta-right {
+            text-align: right;
+            min-width: 120px;
+        }
+
+        .date {
+            font-size: 9.5pt;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .location {
+            font-size: 9pt;
+            color: #aeb4bf;
+        }
+
+        .title {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 10pt;
+            margin-bottom: 2px;
+        }
+
+        .details {
+            font-size: 10pt;
+            color: var(--muted);
+            margin-bottom: 1px;
+        }
+
+        ul {
+            margin-left: 18px;
+            margin-top: 4px;
+        }
+
+        li {
+            font-size: 10pt;
+            margin-bottom: 3px;
+            line-height: 1.45;
+            color: var(--muted);
+        }
+
+        .skills {
+            font-size: 10pt;
+            line-height: 1.5;
+            color: var(--muted);
+        }
+
+        .skills strong {
+            color: var(--text);
+        }
+
+        @media print {
+            body {
+                width: 210mm;
+                height: 297mm;
+                background: white;
+                color: #333;
+            }
+            .container {
+                margin: 0;
+                border: none;
+                border-radius: 0;
+                background: white;
+                color: #333;
+            }
+            h1, .institution, .title, .skills strong {
+                color: #2c3e50;
+            }
+            .summary {
+                background: #f8f9fa;
+                color: #555;
+                border-left-color: #2c3e50;
+            }
+            h2 {
+                color: #2c3e50;
+                border-bottom-color: #34495e;
+            }
+            .contact a, .lang-toggle a {
+                color: #2c5aa0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="lang-toggle">
+                <strong>ES</strong><span>·</span><a href="/cv/cv.en.html">EN</a>
+            </div>
+            <h1>ANONYMOUS CANDIDATE</h1>
+            <div class="contact">
+                Location withheld | email available upon request | phone available upon request
+            </div>
+        </header>
+
+        <div class="summary">
+            Estudiante de Ciencias de la Computación con enfoque en automatización de datos, ingeniería de software y sistemas. En un programa de doble titulación en Finanzas-Fintech. Destaco por aprendizaje rápido, investigación aplicada y construcción de soluciones confiables para procesos con alto volumen de información.
+        </div>
+
+        <h2>Educación</h2>
+
+        <div class="education-item">
+            <div class="item-header">
+                <span class="institution">Universidad A</span>
+                <div class="meta-right">
+                    <div class="date">Enero 2022 – Agosto 2025</div>
+                    <div class="location">Ubicación omitida</div>
+                </div>
+            </div>
+            <div class="details">BSc. Ciencias de la Computación</div>
+            <div class="details">Cursos relevantes: Sistemas multimedia, Diseño compiladores, Sistemas avanzados, Ingeniería software, Gráficos computacionales, Programación sistemas.</div>
+        </div>
+
+        <div class="education-item">
+            <div class="item-header">
+                <span class="institution">Instituto B</span>
+                <div class="meta-right">
+                    <div class="date">Septiembre 2021 – Diciembre 2021</div>
+                    <div class="location">Ubicación omitida</div>
+                </div>
+            </div>
+            <div class="details">Programa de Transferencia Universitaria. GPA: 4.0 | Dean's List</div>
+            <div class="details">Cursos relevantes: Introducción al diseño de computadores.</div>
+        </div>
+
+        <div class="education-item">
+            <div class="item-header">
+                <span class="institution">Universidad C</span>
+                <div class="meta-right">
+                    <div class="date">Enero 2021 – Agosto 2021</div>
+                    <div class="location">Ubicación omitida</div>
+                </div>
+            </div>
+            <div class="details">Chino Intensivo II y III</div>
+        </div>
+
+        <h2>Proyectos</h2>
+
+        <div class="experience-item">
+            <div class="item-header">
+                <span class="institution">Pipeline de compilación Decaf — Análisis, AST y LLVM</span>
+                <div class="meta-right">
+                    <div class="date">2025</div>
+                </div>
+            </div>
+            <ul>
+                <li>Desarrollé componentes de un compilador para Decaf con análisis léxico y sintáctico (Flex/Bison) y construcción de AST.</li>
+                <li>Implementé etapas de generación de LLVM y validé salidas con suites de pruebas del curso.</li>
+                <li>Refiné reglas y estructuras para mejorar la trazabilidad del frontend al backend del compilador.</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="item-header">
+                <span class="institution">Motor de rasterizado y shading en WebGL</span>
+                <div class="meta-right">
+                    <div class="date">2024</div>
+                </div>
+            </div>
+            <ul>
+                <li>Implementé creación de mallas (cubo/esfera), transformaciones y cámara para escenas 3D interactivas.</li>
+                <li>Integré Blinn-Phong, texturas y materiales en un pipeline WebGL con parámetros configurables.</li>
+                <li>Diseñé casos de prueba visuales para validar geometría, iluminación y mapeo UV.</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="item-header">
+                <span class="institution">Resolvente del Juego de 15 — Búsqueda A*</span>
+                <div class="meta-right">
+                    <div class="date">2023</div>
+                </div>
+            </div>
+            <ul>
+                <li>Desarrollé un resolvente del Juego de 15 usando algoritmos de exploración de grafos.</li>
+                <li>Implementé A* con heurística admisible para encontrar soluciones óptimas de manera consistente.</li>
+                <li>Optimizé estructuras de datos para acelerar la expansión de estados.</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="item-header">
+                <span class="institution">SPE para stress testing de compiladores (TinyCC)</span>
+                <div class="meta-right">
+                    <div class="date">2025</div>
+                </div>
+            </div>
+            <ul>
+                <li>Construí un framework de pruebas para verificar la correctitud de TinyCC mediante enumeración de programas pequeños (SPE) y comparación diferencial.</li>
+                <li>Automaticé la ejecución en Docker y la consolidación de resultados en reportes de pruebas reproducibles.</li>
+                <li>Diseñé flujos de generación de variantes para cubrir rutas de compilación no triviales.</li>
+            </ul>
+        </div>
+
+        <h2>Experiencia</h2>
+
+        <div class="experience-item">
+            <div class="item-header">
+                <span class="institution">Empresa A (Confidencial)</span>
+                <div class="meta-right">
+                    <div class="date">Septiembre 2025 – Presente</div>
+                    <div class="location">Ubicación omitida</div>
+                </div>
+            </div>
+            <div class="title">Analista de QA de Datos Catastrales</div>
+            <ul>
+                <li>Automaticé controles de calidad catastral validando geometrías, áreas y consistencia topológica de planos en AutoCAD con Python y Shapely.</li>
+                <li>Construí flujos para revisar discrepancias y generar reportes técnicos que aceleran la corrección de datos.</li>
+                <li>Extraje y normalicé datos públicos de rutas de una ciudad para enriquecer análisis territoriales y cruces con catastros.</li>
+                <li>Realicé mantenimiento básico de bases de datos y procesos de depuración para asegurar integridad y trazabilidad.</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="item-header">
+                <span class="institution">Agencia del Sector Público</span>
+                <div class="meta-right">
+                    <div class="date">Abril 2024 – Agosto 2024</div>
+                    <div class="location">Ubicación omitida</div>
+                </div>
+            </div>
+            <div class="title">Practicante - Analista de Datos</div>
+            <ul>
+                <li>Diseñé pipelines de datos para alimentar dashboards con indicadores agrícolas y garantizar consistencia de métricas.</li>
+                <li>Implementé flujos de automatización para generación de reportes PDF, reduciendo cuellos de botella entre áreas.</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="item-header">
+                <span class="institution">Proveedor de Telecomunicaciones</span>
+                <div class="meta-right">
+                    <div class="date">Enero 2024 – Abril 2024</div>
+                    <div class="location">Ubicación omitida</div>
+                </div>
+            </div>
+            <div class="title">Practicante - Analista de Sistemas</div>
+            <ul>
+                <li>Desarrollé un bot en Python para verificar la permanencia o portabilidad de líneas usando fuentes públicas.</li>
+                <li>Construí pipelines ETL para esfuerzos de migración, mejorando trazabilidad y control de datos.</li>
+                <li>Lideré la adopción de versionamiento y organización de scripts para estandarizar el trabajo del equipo.</li>
+            </ul>
+        </div>
+
+        <h2>Información Adicional</h2>
+        <div class="skills">
+            <strong>Habilidades técnicas:</strong> Python, C, C++, SQL<br>
+            <strong>Idiomas:</strong> Español e inglés (bilingüe), francés conversacional, chino mandarín básico<br>
+            <strong>Intereses:</strong> Estudio intensivo de chino con enfoque de inmersión
+        </div>
+    </div>
+</body>
+</html>

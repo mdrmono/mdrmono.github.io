@@ -1,0 +1,104 @@
+name: Update Anki Stats
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC (adjust to your timezone)
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update-stats:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout data repository
+        uses: actions/checkout@v4
+        with:
+          repository: YOUR_USERNAME/anki-stats-data  # Change this to your data repo
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: data-repo
+
+      - name: Install Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+          tags: tag:ci
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install paramiko  # For SSH connection
+
+      - name: Configure SSH
+        env:
+          PI_SSH_KEY: ${{ secrets.PI_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$PI_SSH_KEY" > ~/.ssh/pi_key
+          chmod 600 ~/.ssh/pi_key
+          ssh-keyscan ${{ secrets.PI_SSH_HOST }} >> ~/.ssh/known_hosts || true
+
+      - name: Export Anki stats from Raspberry Pi
+        env:
+          PI_SSH_HOST: ${{ secrets.PI_SSH_HOST }}
+          PI_SSH_USER: ${{ secrets.PI_SSH_USER }}
+        run: |
+          echo "Connecting to Raspberry Pi via Tailscale..."
+
+          # Run the export script on the Pi
+          ssh -i ~/.ssh/pi_key \
+              -o StrictHostKeyChecking=no \
+              ${PI_SSH_USER}@${PI_SSH_HOST} \
+              "cd /home/${PI_SSH_USER}/anki-export && python3 export_anki_stats.py --output /tmp/anki-stats.json"
+
+          # Download the generated file
+          scp -i ~/.ssh/pi_key \
+              -o StrictHostKeyChecking=no \
+              ${PI_SSH_USER}@${PI_SSH_HOST}:/tmp/anki-stats.json \
+              data-repo/data/anki-stats.json
+
+          echo "Stats exported successfully"
+
+      - name: Check if stats have changed
+        id: check_changes
+        run: |
+          cd data-repo
+          if git diff --quiet data/anki-stats.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes detected"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Changes detected"
+          fi
+
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          cd data-repo
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+          STATS_DATE=$(date +"%Y-%m-%d")
+          git add data/anki-stats.json
+          git commit -m "Update Anki stats - ${STATS_DATE}"
+          git push
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f ~/.ssh/pi_key
+
+      - name: Report status
+        if: always()
+        run: |
+          if [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
+            echo "✅ Anki stats updated successfully"
+          else
+            echo "ℹ️  No changes to commit"
+          fi
