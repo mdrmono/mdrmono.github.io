@@ -9,4 +9,63 @@
     margin-right: 8px;
     vertical-align: middle;
 }
+
+/* Hide the CV nav item without removing it from config/content. */
+.headerLinks li:has(> a[href$="/cv"]),
+.headerLinks li:has(> a[href$="/cv/"]),
+.headerLinks li:has(> a[href*="cv.pdf"]),
+.headerLinks li:has(> a[title="cv" i]),
+.headerLinks li:has(> a[aria-label="cv" i]),
+.socialNavbar li:has(> a[href$="/cv"]),
+.socialNavbar li:has(> a[href$="/cv/"]),
+.socialNavbar li:has(> a[href*="cv.pdf"]),
+.socialNavbar li:has(> a[title="cv" i]),
+.socialNavbar li:has(> a[aria-label="cv" i]) {
+    display: none !important;
+}
+
+/* Fallback for browsers without :has(): hide the link itself. */
+.headerLinks a[href$="/cv"],
+.headerLinks a[href$="/cv/"],
+.headerLinks a[href*="cv.pdf"],
+.headerLinks a[title="cv" i],
+.headerLinks a[aria-label="cv" i],
+.socialNavbar a[href$="/cv"],
+.socialNavbar a[href$="/cv/"],
+.socialNavbar a[href*="cv.pdf"],
+.socialNavbar a[title="cv" i],
+.socialNavbar a[aria-label="cv" i] {
+    display: none !important;
+}
 </style>
+
+<!-- JS fallback: hide a "CV" link by text/title/aria/href -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const candidates = document.querySelectorAll(".headerLinks a, .socialNavbar a");
+    for (const a of candidates) {
+        const text = (a.textContent || "").trim().toLowerCase();
+        const title = (a.getAttribute("title") || "").trim().toLowerCase();
+        const aria = (a.getAttribute("aria-label") || "").trim().toLowerCase();
+        const href = (a.getAttribute("href") || "").trim().toLowerCase();
+
+        const isCv =
+            text === "cv" ||
+            text === "~/cv" ||
+            title === "cv" ||
+            aria === "cv" ||
+            href.endsWith("/cv") ||
+            href.endsWith("/cv/") ||
+            href.includes("cv.pdf");
+
+        if (!isCv) continue;
+
+        const li = a.closest("li");
+        if (li) {
+            li.style.display = "none";
+        } else {
+            a.style.display = "none";
+        }
+    }
+});
+</script>
