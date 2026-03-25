@@ -1,0 +1,7 @@
+[submodule "themes/nightfall"]
+	path = themes/nightfall
+	url = git@github.com:lordmathis/hugo-theme-nightfall.git
+# [submodule "static/data"]
+# 	path = static/data
+# 	url = git@github.com:mdrmono/anki-stats-data.git
+# 	branch = main
