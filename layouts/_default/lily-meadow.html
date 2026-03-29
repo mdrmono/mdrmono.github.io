@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}">
+<head>
+    <title>{{ .Title }} | {{ .Site.Params.author.name }}</title>
+    <meta name="robots" content="noindex, nofollow">
+    {{ partial "head.html" . }}
+    <style>
+        :root {
+            --meadow-ink: #f3ffef;
+            --meadow-x: 50%;
+            --meadow-y: 50%;
+            --meadow-zoom: 1;
+        }
+
+        html,
+        body {
+            height: 100%;
+            min-height: 100dvh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        body {
+            background: #7fd0ff;
+            color: var(--meadow-ink);
+            font-family: "Open Sans", sans-serif;
+        }
+
+        .lilyMeadowPage {
+            height: 100vh;
+            height: 100dvh;
+            isolation: isolate;
+            min-height: 100svh;
+            overflow: hidden;
+            position: relative;
+            width: 100vw;
+        }
+
+        .lilyMeadowBackdrop,
+        .lilyMeadowBackdrop::after {
+            inset: 0;
+            position: absolute;
+        }
+
+        .lilyMeadowBackdrop {
+            background-image:
+                linear-gradient(180deg, rgba(132, 213, 255, 0.18), rgba(19, 84, 41, 0.18)),
+                url("{{ "/scenes/lily-meadow-lowres.png" | relURL }}");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            filter: blur(20px) saturate(1.03);
+            transform: scale(1.08);
+        }
+
+        .lilyMeadowBackdrop::after {
+            content: "";
+            background:
+                radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.14), transparent 26%),
+                linear-gradient(180deg, transparent 0%, rgba(28, 84, 39, 0.12) 100%);
+        }
+
+        .lilyMeadowStage {
+            inset: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .lilyMeadowShell {
+            aspect-ratio: 768 / 512;
+            height: max(100vh, calc(100vw * 512 / 768));
+            height: max(100dvh, calc(100vw * 512 / 768));
+            left: var(--meadow-x);
+            position: relative;
+            position: absolute;
+            top: var(--meadow-y);
+            transform: translate(-50%, -50%) scale(var(--meadow-zoom));
+            transform-origin: center center;
+            width: max(100vw, calc(100vh * 768 / 512));
+            width: max(100vw, calc(100dvh * 768 / 512));
+        }
+
+        .lilyMeadowShell::before {
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 24%),
+                linear-gradient(0deg, rgba(10, 38, 18, 0.08), transparent 22%);
+            content: "";
+            inset: 0;
+            pointer-events: none;
+            position: absolute;
+            z-index: 3;
+        }
+
+        .lilyMeadowScene {
+            display: block;
+            height: 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            object-fit: cover;
+            width: 100%;
+            user-select: none;
+        }
+
+        .lilyMeadowBreeze {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0));
+            filter: blur(18px);
+            height: 26%;
+            left: 50%;
+            opacity: 0.48;
+            position: absolute;
+            top: 9%;
+            transform: translateX(-50%);
+            width: 58%;
+            z-index: 1;
+        }
+
+        .lilyMeadowFlowers {
+            inset: 0;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .lilyMeadowFlower {
+            --lift: 0px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            background-color: transparent;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+            color: inherit;
+            --petal-scale: 1;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+            margin: 0;
+            padding: 0;
+            position: absolute;
+            touch-action: manipulation;
+            transform: translateX(-50%);
+            transform-origin: center bottom;
+        }
+
+        .lilyMeadowFlower img {
+            display: block;
+            filter: drop-shadow(0 8px 14px rgba(10, 36, 18, 0.24));
+            height: auto;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            transform: translateY(var(--lift)) scale(var(--petal-scale));
+            transform-origin: center bottom;
+            transition: transform 0.25s ease;
+            width: 100%;
+        }
+
+        .lilyMeadowFlower::after {
+            background: rgba(19, 77, 34, 0.16);
+            border-radius: 999px;
+            content: "";
+            filter: blur(5px);
+            height: 10px;
+            left: 18%;
+            position: absolute;
+            right: 18%;
+            top: calc(100% - 8px);
+        }
+
+        .lilyMeadowFlower[data-size="tiny"] { width: 28px; }
+        .lilyMeadowFlower[data-size="small"] { width: 38px; }
+        .lilyMeadowFlower[data-size="medium"] { width: 52px; }
+        .lilyMeadowFlower[data-size="large"] { width: 72px; }
+
+        .lilyMeadowFlower[data-depth="far"] { filter: saturate(0.94); opacity: 0.94; }
+        .lilyMeadowFlower[data-depth="mid"] { opacity: 0.98; }
+        .lilyMeadowFlower[data-depth="front"] { filter: saturate(1.02); }
+
+        .lilyMeadowFlower:hover,
+        .lilyMeadowFlower:focus-visible,
+        .lilyMeadowFlower.is-blooming {
+            --lift: -2px;
+            --petal-scale: 1.04;
+            outline: none;
+        }
+
+        .lilyMeadowFlower:hover img,
+        .lilyMeadowFlower:focus-visible img,
+        .lilyMeadowFlower.is-blooming img {
+            filter:
+                drop-shadow(0 0 14px rgba(255, 255, 218, 0.34))
+                drop-shadow(0 8px 14px rgba(10, 36, 18, 0.24));
+        }
+
+        .lilyMeadowFlower[data-anim="1"] { animation: meadowSwayA 5.2s steps(1) infinite; }
+        .lilyMeadowFlower[data-anim="2"] { animation: meadowSwayB 6.1s steps(1) infinite; }
+        .lilyMeadowFlower[data-anim="3"] { animation: meadowSwayC 5.7s steps(1) infinite; }
+
+        .lilyMeadowSpark {
+            background: rgba(255, 255, 238, 0.9);
+            border-radius: 50%;
+            box-shadow: 0 0 14px rgba(255, 255, 224, 0.48);
+            height: 5px;
+            opacity: 0;
+            pointer-events: none;
+            position: absolute;
+            width: 5px;
+        }
+
+        .lilyMeadowFlower.is-blooming .lilyMeadowSpark {
+            animation: meadowSpark 1.15s ease-out infinite;
+            opacity: 1;
+        }
+
+        .lilyMeadowSpark:nth-child(2) { animation-delay: 0s; left: 48%; top: 12%; }
+        .lilyMeadowSpark:nth-child(3) { animation-delay: 0.12s; left: 26%; top: 22%; }
+        .lilyMeadowSpark:nth-child(4) { animation-delay: 0.24s; left: 70%; top: 18%; }
+        .lilyMeadowSpark:nth-child(5) { animation-delay: 0.36s; left: 36%; top: 34%; }
+        .lilyMeadowSpark:nth-child(6) { animation-delay: 0.5s; left: 62%; top: 30%; }
+
+        @keyframes meadowSwayA {
+            0%, 100% { transform: translateX(-50%) rotate(0deg); }
+            50% { transform: translateX(-50%) rotate(0.65deg); }
+        }
+
+        @keyframes meadowSwayB {
+            0%, 100% { transform: translateX(-50%) rotate(0.2deg); }
+            50% { transform: translateX(-50%) rotate(-0.55deg); }
+        }
+
+        @keyframes meadowSwayC {
+            0%, 100% { transform: translateX(-50%) rotate(-0.15deg); }
+            50% { transform: translateX(-50%) rotate(0.48deg); }
+        }
+
+        @keyframes meadowSpark {
+            0% {
+                opacity: 0;
+                transform: translate(0, 4px) scale(0.5);
+            }
+            20% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(0, -18px) scale(1);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .lilyMeadowFlower,
+            .lilyMeadowSpark {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+        @media (max-width: 720px) {
+            :root {
+                --meadow-y: 48%;
+                --meadow-zoom: 1.08;
+            }
+        }
+
+        @media (max-width: 720px) and (orientation: landscape) {
+            :root {
+                --meadow-y: 50%;
+                --meadow-zoom: 1.02;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="lilyMeadowPage">
+        <div class="lilyMeadowBackdrop" aria-hidden="true"></div>
+
+        <section class="lilyMeadowStage" aria-label="Hidden lily meadow scene">
+            <div class="lilyMeadowShell">
+                <div class="lilyMeadowBreeze" aria-hidden="true"></div>
+                <img
+                    class="lilyMeadowScene"
+                    src="{{ "/scenes/lily-meadow-lowres.png" | relURL }}"
+                    alt="Pixel art meadow scene with trees, mountains, and an open field"
+                    width="768"
+                    height="512"
+                >
+
+                <div class="lilyMeadowFlowers">
+                    <button class="lilyMeadowFlower" style="left: 11%; top: 82%;" data-size="medium" data-depth="front" data-anim="3" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 18%; top: 77%;" data-size="large" data-depth="front" data-anim="2" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 24%; top: 66%;" data-size="small" data-depth="mid" data-anim="1" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 31%; top: 73%;" data-size="medium" data-depth="front" data-anim="1" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 37%; top: 76%;" data-size="medium" data-depth="front" data-anim="2" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 44%; top: 69%;" data-size="small" data-depth="mid" data-anim="1" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 50%; top: 67%;" data-size="small" data-depth="mid" data-anim="3" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 55%; top: 78%;" data-size="large" data-depth="front" data-anim="3" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 63%; top: 72%;" data-size="medium" data-depth="front" data-anim="2" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 69%; top: 64%;" data-size="small" data-depth="mid" data-anim="1" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 74%; top: 75%;" data-size="medium" data-depth="front" data-anim="2" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 79%; top: 78%;" data-size="large" data-depth="front" data-anim="1" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 88%; top: 82%;" data-size="medium" data-depth="front" data-anim="3" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 17%; top: 58%;" data-size="tiny" data-depth="far" data-anim="2" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 33%; top: 56%;" data-size="tiny" data-depth="far" data-anim="3" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 41%; top: 61%;" data-size="tiny" data-depth="far" data-anim="2" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 49%; top: 55%;" data-size="tiny" data-depth="far" data-anim="1" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 57%; top: 59%;" data-size="tiny" data-depth="far" data-anim="3" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 66%; top: 57%;" data-size="tiny" data-depth="far" data-anim="2" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                    <button class="lilyMeadowFlower" style="left: 82%; top: 60%;" data-size="tiny" data-depth="far" data-anim="1" type="button" aria-label="Bloom lily">
+                        <img src="{{ "/scenes/meadow-lily.png" | relURL }}" data-normal-src="{{ "/scenes/meadow-lily.png" | relURL }}" data-bloom-src="{{ "/scenes/meadow-lily-bloom.png" | relURL }}" alt="">
+                        <span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span><span class="lilyMeadowSpark"></span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const flowers = Array.from(document.querySelectorAll(".lilyMeadowFlower"));
+            const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+            let audioContext = null;
+            let fartNoiseBuffer = null;
+
+            const getAudioContext = function () {
+                if (!AudioContextCtor) {
+                    return null;
+                }
+
+                if (!audioContext) {
+                    audioContext = new AudioContextCtor();
+                }
+
+                return audioContext;
+            };
+
+            const getNoiseBuffer = function (context) {
+                if (fartNoiseBuffer) {
+                    return fartNoiseBuffer;
+                }
+
+                const buffer = context.createBuffer(1, Math.floor(context.sampleRate * 0.45), context.sampleRate);
+                const channel = buffer.getChannelData(0);
+
+                for (let index = 0; index < channel.length; index += 1) {
+                    channel[index] = (Math.random() * 2 - 1) * (1 - index / channel.length);
+                }
+
+                fartNoiseBuffer = buffer;
+                return fartNoiseBuffer;
+            };
+
+            // Tiny synth so each bloom gets a short comic fart without shipping audio files.
+            const startFart = function (context, flower) {
+                const now = context.currentTime + 0.01;
+                const sizeTuning = {
+                    tiny: 118,
+                    small: 103,
+                    medium: 92,
+                    large: 78
+                };
+                const baseFrequency = sizeTuning[flower.dataset.size] || 92;
+                const master = context.createGain();
+                const toneGain = context.createGain();
+                const noiseGain = context.createGain();
+                const tone = context.createOscillator();
+                const wobble = context.createOscillator();
+                const wobbleDepth = context.createGain();
+                const toneFilter = context.createBiquadFilter();
+                const noiseFilter = context.createBiquadFilter();
+                const noise = context.createBufferSource();
+
+                tone.type = "sawtooth";
+                tone.frequency.setValueAtTime(baseFrequency, now);
+                tone.frequency.exponentialRampToValueAtTime(baseFrequency * 0.42, now + 0.24);
+
+                wobble.type = "sine";
+                wobble.frequency.setValueAtTime(16 + Math.random() * 5, now);
+                wobbleDepth.gain.setValueAtTime(8, now);
+
+                toneFilter.type = "lowpass";
+                toneFilter.frequency.setValueAtTime(520, now);
+                toneFilter.frequency.exponentialRampToValueAtTime(140, now + 0.24);
+                toneFilter.Q.value = 0.8;
+
+                noise.buffer = getNoiseBuffer(context);
+                noiseFilter.type = "bandpass";
+                noiseFilter.frequency.setValueAtTime(240, now);
+                noiseFilter.frequency.exponentialRampToValueAtTime(110, now + 0.18);
+                noiseFilter.Q.value = 0.7;
+
+                master.gain.setValueAtTime(0.0001, now);
+                master.gain.exponentialRampToValueAtTime(0.16, now + 0.015);
+                master.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
+
+                toneGain.gain.setValueAtTime(0.0001, now);
+                toneGain.gain.exponentialRampToValueAtTime(0.55, now + 0.02);
+                toneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
+
+                noiseGain.gain.setValueAtTime(0.1, now);
+                noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+
+                wobble.connect(wobbleDepth);
+                wobbleDepth.connect(tone.frequency);
+
+                tone.connect(toneGain);
+                toneGain.connect(toneFilter);
+                toneFilter.connect(master);
+
+                noise.connect(noiseFilter);
+                noiseFilter.connect(noiseGain);
+                noiseGain.connect(master);
+
+                master.connect(context.destination);
+
+                tone.start(now);
+                wobble.start(now);
+                noise.start(now);
+
+                tone.stop(now + 0.35);
+                wobble.stop(now + 0.35);
+                noise.stop(now + 0.2);
+
+                window.setTimeout(function () {
+                    master.disconnect();
+                    toneGain.disconnect();
+                    noiseGain.disconnect();
+                    toneFilter.disconnect();
+                    noiseFilter.disconnect();
+                    wobbleDepth.disconnect();
+                }, 450);
+            };
+
+            const playFart = function (flower) {
+                const context = getAudioContext();
+                if (!context) {
+                    return;
+                }
+
+                const begin = function () {
+                    startFart(context, flower);
+                };
+
+                if (context.state === "suspended") {
+                    context.resume().then(begin).catch(function () {});
+                    return;
+                }
+
+                begin();
+            };
+
+            const bloom = function (flower) {
+                const image = flower.querySelector("img");
+                if (!image) {
+                    return;
+                }
+
+                flower.classList.add("is-blooming");
+                image.src = image.dataset.bloomSrc;
+
+                window.clearTimeout(flower._bloomReset);
+                flower._bloomReset = window.setTimeout(function () {
+                    flower.classList.remove("is-blooming");
+                    image.src = image.dataset.normalSrc;
+                }, 1400);
+            };
+
+            flowers.forEach(function (flower) {
+                flower.addEventListener("click", function () {
+                    playFart(flower);
+                    bloom(flower);
+                });
+            });
+        }());
+    </script>
+</body>
+</html>
