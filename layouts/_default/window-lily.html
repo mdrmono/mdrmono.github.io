@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}">
+<head>
+    <title>{{ .Title }} | {{ .Site.Params.author.name }}</title>
+    <meta name="robots" content="noindex, nofollow">
+    {{ partial "head.html" . }}
+    <style>
+        :root {
+            --room-shadow: rgba(18, 8, 3, 0.58);
+            --room-ink: #fff5df;
+            --room-muted: rgba(255, 243, 219, 0.74);
+            --room-glow: rgba(255, 230, 168, 0.45);
+            --room-glow-strong: rgba(255, 236, 176, 0.88);
+            --room-panel: rgba(40, 20, 10, 0.54);
+            --parallax-x: 0px;
+            --parallax-y: 0px;
+            --beam-x: 0px;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        body {
+            background: #1a0e08;
+            color: var(--room-ink);
+            font-family: "Open Sans", sans-serif;
+        }
+
+        .windowLilyPage {
+            height: 100vh;
+            isolation: isolate;
+            overflow: hidden;
+            position: relative;
+            width: 100vw;
+        }
+
+        .windowLilyBackdrop,
+        .windowLilyBackdrop::after {
+            inset: 0;
+            position: absolute;
+        }
+
+        .windowLilyBackdrop {
+            background-image:
+                linear-gradient(180deg, rgba(17, 8, 5, 0.4), rgba(17, 8, 5, 0.68)),
+                url("{{ "/scenes/cozy-window-room-lowres.png" | relURL }}");
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            filter: blur(22px) saturate(0.92);
+            transform: scale(1.08);
+        }
+
+        .windowLilyBackdrop::after {
+            content: "";
+            background:
+                radial-gradient(circle at 70% 18%, rgba(255, 237, 178, 0.24), transparent 28%),
+                radial-gradient(circle at 50% 70%, rgba(88, 48, 24, 0.24), transparent 42%);
+        }
+
+        .windowLilyHome,
+        .windowLilyHint,
+        .windowLilyStatus {
+            backdrop-filter: blur(12px);
+            background: var(--room-panel);
+            border: 1px solid rgba(255, 241, 214, 0.18);
+            border-radius: 999px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+            color: var(--room-ink);
+            font-family: "Fira Mono", monospace;
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+            position: absolute;
+            text-decoration: none;
+            text-transform: lowercase;
+            z-index: 4;
+        }
+
+        .windowLilyHome {
+            left: 1rem;
+            padding: 0.75rem 1rem;
+            top: 1rem;
+        }
+
+        .windowLilyHint,
+        .windowLilyStatus {
+            padding: 0.75rem 1rem;
+            right: 1rem;
+        }
+
+        .windowLilyHint {
+            bottom: 1rem;
+        }
+
+        .windowLilyStatus {
+            bottom: 4.45rem;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .windowLilyStatus.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .windowLilyStage {
+            align-items: center;
+            display: grid;
+            height: 100%;
+            justify-items: center;
+            position: relative;
+            width: 100%;
+            z-index: 2;
+        }
+
+        .windowLilySceneShell {
+            aspect-ratio: 512 / 280;
+            height: min(100vh, calc(100vw * 280 / 512));
+            position: relative;
+            width: min(100vw, calc(100vh * 512 / 280));
+        }
+
+        .windowLilySceneShell::before {
+            content: "";
+            inset: 0;
+            position: absolute;
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 243, 219, 0.12),
+                0 45px 120px rgba(0, 0, 0, 0.34);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .windowLilyScene {
+            display: block;
+            height: 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            object-fit: contain;
+            width: 100%;
+            user-select: none;
+        }
+
+        .windowLilySunbeam,
+        .windowLilySunbeam::after {
+            pointer-events: none;
+            position: absolute;
+        }
+
+        .windowLilySunbeam {
+            background: linear-gradient(180deg, rgba(255, 237, 185, 0.24), rgba(255, 237, 185, 0));
+            filter: blur(18px);
+            height: 58%;
+            left: 50%;
+            opacity: 0.7;
+            top: 8%;
+            transform: translateX(calc(-50% + var(--beam-x))) skewX(-8deg);
+            width: 18%;
+            z-index: 1;
+        }
+
+        .windowLilySunbeam::after {
+            content: "";
+            background: linear-gradient(180deg, rgba(255, 243, 214, 0.16), rgba(255, 243, 214, 0));
+            inset: 8% 24% auto;
+            height: 76%;
+        }
+
+        .windowLilyMotes {
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .windowLilyMotes span {
+            animation: moteFloat linear infinite;
+            background: rgba(255, 244, 221, 0.75);
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(255, 237, 181, 0.3);
+            display: block;
+            position: absolute;
+        }
+
+        .windowLilyMotes span:nth-child(1) { animation-duration: 10s; height: 3px; left: 29%; top: 18%; width: 3px; }
+        .windowLilyMotes span:nth-child(2) { animation-delay: -3s; animation-duration: 12s; height: 2px; left: 36%; top: 24%; width: 2px; }
+        .windowLilyMotes span:nth-child(3) { animation-delay: -5s; animation-duration: 11s; height: 4px; left: 54%; top: 28%; width: 4px; }
+        .windowLilyMotes span:nth-child(4) { animation-delay: -1s; animation-duration: 9s; height: 3px; left: 61%; top: 17%; width: 3px; }
+        .windowLilyMotes span:nth-child(5) { animation-delay: -6s; animation-duration: 13s; height: 2px; left: 69%; top: 31%; width: 2px; }
+        .windowLilyMotes span:nth-child(6) { animation-delay: -4s; animation-duration: 8s; height: 2px; left: 47%; top: 13%; width: 2px; }
+
+        .windowLilyButton {
+            appearance: none;
+            background: none;
+            border: 0;
+            bottom: 16.8%;
+            cursor: pointer;
+            left: 50%;
+            padding: 0;
+            position: absolute;
+            transform: translateX(-50%);
+            width: clamp(96px, 11vw, 176px);
+            z-index: 2;
+        }
+
+        .windowLilyButton:focus-visible {
+            outline: 2px solid rgba(255, 239, 194, 0.8);
+            outline-offset: 8px;
+        }
+
+        .windowLilyAura {
+            --aura-scale: 0.9;
+            background: radial-gradient(circle, var(--room-glow-strong) 0%, rgba(255, 233, 168, 0.22) 42%, rgba(255, 233, 168, 0) 76%);
+            filter: blur(12px);
+            inset: 18% 26% 32%;
+            opacity: 0.18;
+            position: absolute;
+            transform: translateX(var(--parallax-x)) translateY(var(--parallax-y)) scale(var(--aura-scale));
+            transition: opacity 0.3s ease, transform 0.25s ease;
+            z-index: 0;
+        }
+
+        .windowLilyButton:hover .windowLilyAura,
+        .windowLilyPage.is-blooming .windowLilyAura {
+            --aura-scale: 1.18;
+            opacity: 0.58;
+        }
+
+        .windowLilyShadow {
+            background: rgba(48, 23, 12, 0.26);
+            border-radius: 999px;
+            filter: blur(6px);
+            height: 10%;
+            left: 22%;
+            position: absolute;
+            right: 22%;
+            top: 84%;
+            z-index: 0;
+        }
+
+        .windowLilyAsset {
+            display: block;
+            filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.24));
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            position: relative;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .windowLilyPage.is-blooming .windowLilySparkles span {
+            animation-play-state: running;
+            opacity: 1;
+        }
+
+        .windowLilySparkles {
+            inset: 0;
+            pointer-events: none;
+            position: absolute;
+            transform: translateX(var(--parallax-x)) translateY(var(--parallax-y));
+            transition: transform 0.25s ease;
+            z-index: 2;
+        }
+
+        .windowLilySparkles span {
+            animation: sparkleBurst 1.3s ease-out infinite paused;
+            background: rgba(255, 245, 211, 0.9);
+            border-radius: 50%;
+            box-shadow: 0 0 12px rgba(255, 239, 194, 0.5);
+            height: 5px;
+            opacity: 0;
+            position: absolute;
+            width: 5px;
+        }
+
+        .windowLilySparkles span:nth-child(1) { animation-delay: 0s; left: 28%; top: 24%; }
+        .windowLilySparkles span:nth-child(2) { animation-delay: 0.18s; left: 66%; top: 18%; }
+        .windowLilySparkles span:nth-child(3) { animation-delay: 0.32s; left: 22%; top: 44%; }
+        .windowLilySparkles span:nth-child(4) { animation-delay: 0.44s; left: 72%; top: 38%; }
+        .windowLilySparkles span:nth-child(5) { animation-delay: 0.58s; left: 48%; top: 12%; }
+
+        .windowLilyHotspot {
+            align-items: center;
+            display: flex;
+            inset: 0;
+            justify-content: center;
+            pointer-events: none;
+            position: absolute;
+            transform: translateX(var(--parallax-x)) translateY(var(--parallax-y));
+            transition: transform 0.25s ease;
+        }
+
+        .windowLilyLabel {
+            background: rgba(32, 16, 9, 0.54);
+            border: 1px solid rgba(255, 242, 210, 0.16);
+            border-radius: 999px;
+            color: var(--room-muted);
+            font-family: "Fira Mono", monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.04em;
+            opacity: 0;
+            padding: 0.4rem 0.7rem;
+            position: absolute;
+            top: 8%;
+            transform: translateY(8px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .windowLilyButton:hover .windowLilyLabel,
+        .windowLilyButton:focus-visible .windowLilyLabel,
+        .windowLilyPage.is-blooming .windowLilyLabel {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes moteFloat {
+            0% {
+                opacity: 0;
+                transform: translate3d(0, 16px, 0) scale(0.8);
+            }
+            20%,
+            80% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate3d(12px, -24px, 0) scale(1.1);
+            }
+        }
+
+        @keyframes sparkleBurst {
+            0% {
+                opacity: 0;
+                transform: translate(0, 8px) scale(0.4);
+            }
+            15% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(0, -22px) scale(1);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .windowLilyBackdrop,
+            .windowLilyMotes span,
+            .windowLilySparkles span {
+                animation: none !important;
+                transition: none !important;
+            }
+
+            .windowLilyButton {
+                transform: translateX(-50%);
+            }
+        }
+
+        @media (max-width: 720px) {
+            .windowLilyHome,
+            .windowLilyHint,
+            .windowLilyStatus {
+                font-size: 0.66rem;
+            }
+
+            .windowLilyStatus {
+                bottom: 4rem;
+            }
+
+            .windowLilyHint {
+                max-width: min(68vw, 260px);
+                text-align: right;
+            }
+
+            .windowLilyButton {
+                bottom: 17.2%;
+                width: clamp(88px, 22vw, 150px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="windowLilyPage" id="window-lily-page">
+        <div class="windowLilyBackdrop" aria-hidden="true"></div>
+        <a class="windowLilyHome" href="{{ "/" | relURL }}">~/home</a>
+        <div class="windowLilyStatus" id="window-lily-status">the lily is blooming</div>
+        <div class="windowLilyHint">move the cursor for parallax • click the lily or press <strong>b</strong> to bloom</div>
+
+        <section class="windowLilyStage" aria-label="Hidden window-lily scene">
+            <div class="windowLilySceneShell" id="window-lily-scene">
+                <div class="windowLilySunbeam" aria-hidden="true"></div>
+                <div class="windowLilyMotes" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+                <img
+                    class="windowLilyScene"
+                    src="{{ "/scenes/cozy-window-room-lowres.png" | relURL }}"
+                    alt="Cozy pixel-art room scene with a sunny window and windowsill"
+                    width="512"
+                    height="280"
+                >
+
+                <button class="windowLilyButton" id="window-lily-button" type="button" aria-pressed="false" aria-label="Bloom the lily">
+                    <span class="windowLilyAura" aria-hidden="true"></span>
+                    <span class="windowLilyShadow" aria-hidden="true"></span>
+                    <span class="windowLilySparkles" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                    <span class="windowLilyHotspot" aria-hidden="true">
+                        <span class="windowLilyLabel">soft bloom</span>
+                    </span>
+                    <img
+                        id="window-lily-asset"
+                        class="windowLilyAsset"
+                        src="{{ "/scenes/window-lily.svg" | relURL }}"
+                        data-normal-src="{{ "/scenes/window-lily.svg" | relURL }}"
+                        data-bloom-src="{{ "/scenes/window-lily-bloom.svg" | relURL }}"
+                        alt=""
+                        width="64"
+                        height="112"
+                    >
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const page = document.getElementById("window-lily-page");
+            const scene = document.getElementById("window-lily-scene");
+            const button = document.getElementById("window-lily-button");
+            const asset = document.getElementById("window-lily-asset");
+            const status = document.getElementById("window-lily-status");
+            const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            let bloomTimer = null;
+
+            const showStatus = function (text) {
+                status.textContent = text;
+                status.classList.add("is-visible");
+                window.clearTimeout(bloomTimer);
+                bloomTimer = window.setTimeout(function () {
+                    status.classList.remove("is-visible");
+                }, 1600);
+            };
+
+            const setBlooming = function (isBlooming) {
+                page.classList.toggle("is-blooming", isBlooming);
+                button.setAttribute("aria-pressed", String(isBlooming));
+                if (asset) {
+                    asset.src = isBlooming ? asset.dataset.bloomSrc : asset.dataset.normalSrc;
+                }
+                showStatus(isBlooming ? "the lily is blooming" : "the lily settles back");
+            };
+
+            const triggerBloom = function () {
+                setBlooming(true);
+                window.clearTimeout(button._bloomReset);
+                button._bloomReset = window.setTimeout(function () {
+                    setBlooming(false);
+                }, 1800);
+            };
+
+            if (!reducedMotion) {
+                scene.addEventListener("pointermove", function (event) {
+                    const rect = scene.getBoundingClientRect();
+                    const x = ((event.clientX - rect.left) / rect.width) - 0.5;
+                    const y = ((event.clientY - rect.top) / rect.height) - 0.5;
+                    page.style.setProperty("--parallax-x", (x * 10).toFixed(0) + "px");
+                    page.style.setProperty("--parallax-y", (y * 6).toFixed(0) + "px");
+                    page.style.setProperty("--beam-x", (x * 4).toFixed(0) + "px");
+                });
+
+                scene.addEventListener("pointerleave", function () {
+                    page.style.setProperty("--parallax-x", "0px");
+                    page.style.setProperty("--parallax-y", "0px");
+                    page.style.setProperty("--beam-x", "0px");
+                });
+            }
+
+            button.addEventListener("click", function () {
+                triggerBloom();
+            });
+
+            window.addEventListener("keydown", function (event) {
+                if (event.key.toLowerCase() === "b") {
+                    triggerBloom();
+                }
+            });
+        }());
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 112" aria-hidden="true">
+  <style>
+    svg {
+      image-rendering: pixelated;
+      shape-rendering: crispEdges;
+    }
+
+    .plant {
+      animation: lilyIdle 4.5s steps(1) infinite;
+      transform-origin: 32px 84px;
+    }
+
+    .leaves {
+      animation: leafIdle 4.5s steps(1) infinite;
+    }
+
+    @keyframes lilyIdle {
+      0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+      25% { transform: translate(0px, -1px) rotate(0.35deg); }
+      50% { transform: translate(0px, -1px) rotate(0.7deg); }
+      75% { transform: translate(0px, -1px) rotate(0.25deg); }
+    }
+
+    @keyframes leafIdle {
+      0%, 100% { transform: translate(0px, 0px); }
+      50% { transform: translate(0.5px, 0px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .plant,
+      .leaves {
+        animation: none !important;
+      }
+    }
+  </style>
+
+  <g class="plant">
+    <g>
+      <rect x="30" y="10" width="4" height="4" fill="#fff8eb"/>
+      <rect x="28" y="14" width="8" height="4" fill="#f3ead6"/>
+      <rect x="26" y="18" width="12" height="4" fill="#e8dcc0"/>
+      <rect x="28" y="22" width="8" height="4" fill="#f3ead6"/>
+    </g>
+
+    <g>
+      <rect x="18" y="18" width="4" height="4" fill="#f8f0dc"/>
+      <rect x="16" y="22" width="8" height="4" fill="#eee2c6"/>
+      <rect x="14" y="26" width="10" height="4" fill="#e0d2b4"/>
+      <rect x="16" y="30" width="8" height="4" fill="#f0e4ca"/>
+    </g>
+
+    <g>
+      <rect x="42" y="18" width="4" height="4" fill="#f8f0dc"/>
+      <rect x="40" y="22" width="8" height="4" fill="#eee2c6"/>
+      <rect x="40" y="26" width="10" height="4" fill="#e0d2b4"/>
+      <rect x="40" y="30" width="8" height="4" fill="#f0e4ca"/>
+    </g>
+
+    <g>
+      <rect x="24" y="30" width="16" height="4" fill="#f6eed9"/>
+      <rect x="22" y="34" width="20" height="4" fill="#eadfc3"/>
+      <rect x="24" y="38" width="16" height="4" fill="#ddceb2"/>
+    </g>
+
+    <g>
+      <rect x="29" y="26" width="6" height="4" fill="#f0cf72"/>
+      <rect x="27" y="30" width="10" height="4" fill="#b77f2a"/>
+    </g>
+
+    <g>
+      <rect x="30" y="38" width="4" height="6" fill="#6d8650"/>
+      <rect x="30" y="44" width="4" height="8" fill="#617947"/>
+      <rect x="30" y="52" width="4" height="8" fill="#576d40"/>
+      <rect x="30" y="60" width="4" height="10" fill="#50653d"/>
+      <rect x="30" y="70" width="4" height="14" fill="#586e40"/>
+    </g>
+
+    <g class="leaves">
+      <rect x="22" y="52" width="4" height="4" fill="#7f9b5f"/>
+      <rect x="18" y="56" width="8" height="4" fill="#6f8a53"/>
+      <rect x="16" y="60" width="10" height="4" fill="#607747"/>
+      <rect x="18" y="64" width="8" height="4" fill="#6f8a53"/>
+      <rect x="40" y="56" width="4" height="4" fill="#7d975d"/>
+      <rect x="40" y="60" width="8" height="4" fill="#6d8550"/>
+      <rect x="40" y="64" width="10" height="4" fill="#5f7546"/>
+      <rect x="40" y="68" width="8" height="4" fill="#6d8550"/>
+      <rect x="24" y="68" width="4" height="4" fill="#708852"/>
+      <rect x="20" y="72" width="8" height="4" fill="#5d7345"/>
+    </g>
+  </g>
+
+  <g>
+    <rect x="20" y="82" width="24" height="4" fill="#8e5634"/>
+    <rect x="18" y="86" width="28" height="4" fill="#c07a4c"/>
+    <rect x="16" y="90" width="32" height="12" fill="#b56f43"/>
+    <rect x="18" y="102" width="28" height="4" fill="#8a4f30"/>
+    <rect x="20" y="94" width="4" height="8" fill="#cb8856"/>
+    <rect x="28" y="92" width="4" height="10" fill="#d89a67"/>
+    <rect x="40" y="94" width="4" height="8" fill="#8a4f30"/>
+    <rect x="22" y="86" width="20" height="4" fill="#d89a67"/>
+  </g>
+</svg>
