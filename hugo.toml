@@ -36,7 +36,7 @@ aria = "GitHub Profile"
 [[params.social]]
 key = 0
 name = "codeforces"
-url = "https://www.youtube.com/watch?v=cpTgC-ma-Nc"
+url = "https://codeforces.com/profile/mdrmono"
 target = "_blank"
 aria = "Codeforces Profile"
 
